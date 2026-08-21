@@ -30,7 +30,8 @@ GitHub Actions 首次运行暴露了 2.372 秒的性能回归。修正后，本�
 5,000 路径检查耗时为 0.444–0.554 秒；29 项测试和静态质量检查均通过。
 第二次 GitHub Actions 仍耗时 2.376 秒，说明 Runner 的主要瓶颈在通用 glob
 对象分配。T041 增加快速路径后，本地连续十次耗时为 0.217–0.249 秒，
-并保持全部 29 项测试通过；GitHub Actions 复验继续由 T040 跟踪。
+并保持全部 29 项测试通过。[GitHub Actions run 32453875403](https://github.com/liuyuhui2020/ZHIYI/actions/runs/32453875403)
+随后在 Python 3.12 Linux Runner 上通过 SDD 对齐检查和完整测试套件。
 
 ## Intentional Differences
 
@@ -41,4 +42,4 @@ GitHub Actions 首次运行暴露了 2.372 秒的性能回归。修正后，本�
 
 ## Blocking Findings
 
-None. GitHub Actions 复验由 T040 跟踪，若失败则重新设为 BLOCKED。
+None.

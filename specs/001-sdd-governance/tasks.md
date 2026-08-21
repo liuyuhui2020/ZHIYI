@@ -74,5 +74,5 @@
 ## Phase 8: GitHub CI Performance Correction
 
 - [x] T039 [US1] Normalize each path once per pattern set and skip filesystem reads for Python paths outside configured architecture rules in `scripts/sdd/check_design_drift.py`
-- [ ] T040 [US1] Re-run the 29-test suite, SC-007 benchmark, Git Hooks, and GitHub Actions workflow for `scripts/sdd/check_design_drift.py` and `scripts/sdd/tests/test_design_drift.py`
+- [x] T040 [US1] Re-run the 29-test suite, SC-007 benchmark, Git Hooks, and GitHub Actions workflow for `scripts/sdd/check_design_drift.py` and `scripts/sdd/tests/test_design_drift.py`
 - [x] T041 [US1] Add allocation-free matching for literal and terminal `/**` policy rules in `scripts/sdd/check_design_drift.py`, preserving generic glob behavior for complex rules
