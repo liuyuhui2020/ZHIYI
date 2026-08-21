@@ -152,10 +152,11 @@ def normalize_relative_path(path: str) -> str:
 
 def _normalized_path_matches(path: str, pattern: str) -> bool:
     pattern = pattern.replace("\\", "/")
+    if not any(marker in pattern for marker in "*?["):
+        return path == pattern
     if pattern.endswith("/**"):
         prefix = pattern[:-3].rstrip("/")
-        if path == prefix or path.startswith(prefix + "/"):
-            return True
+        return path == prefix or path.startswith(prefix + "/")
     return PurePosixPath(path).match(pattern) or fnmatch.fnmatchcase(path, pattern)
 
 

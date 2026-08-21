@@ -28,7 +28,9 @@
 
 GitHub Actions 首次运行暴露了 2.372 秒的性能回归。修正后，本地连续五次
 5,000 路径检查耗时为 0.444–0.554 秒；29 项测试和静态质量检查均通过。
-GitHub Actions 复验作为 T040 的剩余发布门禁。
+第二次 GitHub Actions 仍耗时 2.376 秒，说明 Runner 的主要瓶颈在通用 glob
+对象分配。T041 增加快速路径后，本地连续十次耗时为 0.217–0.249 秒，
+并保持全部 29 项测试通过；GitHub Actions 复验继续由 T040 跟踪。
 
 ## Intentional Differences
 
