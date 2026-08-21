@@ -1,0 +1,15 @@
+---
+import mark from '../assets/brand-mark.svg';
+
+interface Props {
+  label?: string;
+  compact?: boolean;
+}
+
+const { label = 'ZHIYI', compact = false } = Astro.props;
+---
+
+<span class:list={['brand-mark', { 'brand-mark--compact': compact }]}>
+  <img src={mark.src} width="40" height="40" alt="" aria-hidden="true" />
+  <span class="brand-mark__text">{label}</span>
+</span>

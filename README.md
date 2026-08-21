@@ -1,19 +1,32 @@
+<h1 align="center">
+  <picture>
+    <source media="(max-width: 600px)" srcset="./assets/banners/zhiyi-readme/resumable-orbit-mobile-720x360.png">
+    <img
+      src="./assets/banners/zhiyi-readme/resumable-orbit-1440x420.png"
+      alt="ZHIYI — Reliable agent execution, beyond the demo."
+      width="100%"
+    >
+  </picture>
+</h1>
+
 <div align="center">
-  <h1>ZHIYI</h1>
-  <p><strong>Designing a production-grade Agent Runtime Platform for the LangChain ecosystem</strong></p>
   <p>面向 Agent 开发者与平台团队，让长时运行任务可恢复、可约束、可审批、可审计、可持续评测。</p>
-  <p><strong>当前处于方案基线与工程治理阶段，产品 Runtime 尚未实现。</strong></p>
+  <p><strong>方案基线与工程治理阶段 · 产品 Runtime 尚未实现</strong></p>
   <p>
     <a href="./doc/PROJECT.md"><strong>查看当前状态与路线图</strong></a> ·
-    <a href="./doc/技术方案.md">阅读技术架构</a>
+    <a href="./doc/技术方案.md">阅读技术架构</a> ·
+    <a href="#official-docs-site">本地预览官网</a>
   </p>
   <p>
     <a href="https://github.com/liuyuhui2020/ZHIYI/actions/workflows/sdd-governance.yml">
       <img alt="SDD Governance" src="https://github.com/liuyuhui2020/ZHIYI/actions/workflows/sdd-governance.yml/badge.svg?branch=main">
     </a>
-    <img alt="Project stage: design baseline" src="https://img.shields.io/badge/stage-design%20baseline-f59e0b?style=flat-square">
-    <img alt="Python target: 3.12" src="https://img.shields.io/badge/Python-target%203.12-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white">
-    <img alt="SDD: Spec Kit" src="https://img.shields.io/badge/SDD-Spec%20Kit-6f42c1?style=flat-square">
+    <a href="https://github.com/liuyuhui2020/ZHIYI/actions/workflows/docs-website.yml">
+      <img alt="Documentation Website" src="https://github.com/liuyuhui2020/ZHIYI/actions/workflows/docs-website.yml/badge.svg?branch=main">
+    </a>
+    <img alt="Project stage: design baseline" src="https://img.shields.io/badge/stage-design%20baseline-7c6cff?style=flat-square">
+    <img alt="Python target: 3.12" src="https://img.shields.io/badge/Python-target%203.12-0f766e?style=flat-square&amp;logo=python&amp;logoColor=white">
+    <img alt="SDD: Spec Kit" src="https://img.shields.io/badge/SDD-Spec%20Kit-334155?style=flat-square">
   </p>
 </div>
 
@@ -24,6 +37,7 @@
   <a href="#architecture">架构</a> ·
   <a href="#roadmap">路线图</a> ·
   <a href="#documentation">文档</a> ·
+  <a href="#official-docs-site">官网</a> ·
   <a href="#development">参与设计与开发</a>
 </p>
 
@@ -46,6 +60,7 @@ Platform。它不以演示 Tool Calling 为终点，而是为长时间运行、�
 |---|:---:|
 | 产品价值、需求、功能和技术方案 | 已建立基线 |
 | Spec Kit、设计漂移检查、Git/Claude Hooks、CI | 已建立 |
+| 官网与文档门户 | 本地静态构建已完成，尚未部署 |
 | Runtime、REST/SSE、Worker、Checkpoint | M0 计划 |
 | Context、Memory、RAG、Tool 审批、Langfuse | M1 计划 |
 | MCP、Subagent、OIDC/RBAC、Helm、生产门禁 | M2 计划 |
@@ -56,14 +71,10 @@ Platform。它不以演示 Tool Calling 为终点，而是为长时间运行、�
 
 以下差异是项目的**设计方向**，将在 M0–M2 按阶段验证：
 
-- **持久执行：** 从单次请求内循环，演进为持久异步 Run、Checkpoint、租约和故障恢复。
-- **Tool 安全：** 从模型直接调用，演进为 Registry、Schema、Policy、审批、幂等和结果查询。
-- **上下文治理：** 从简单拼接 Prompt，演进为固定信任顺序、Context Engine 和 Context Manifest。
-- **受控 Memory：** 不默认永久保存完整对话，而是通过 Policy、来源追踪、TTL、敏感分级和删除路径治理。
-- **可信 RAG：** 不只返回相关文本，还提供权限过滤、文档版本、Provenance 和 Citation。
-- **明确可靠性：** 失败、取消、超限和未知副作用都有明确状态、有限重试、恢复或人工处理路径。
-- **可观测与评测：** 从打印日志，演进为 Run/Step/Model/Tool Trace、指标、事件和持续评测。
-- **可替换框架边界：** 领域语义归产品所有，LangChain 与 LangGraph 通过边界适配而不是成为公共契约。
+- **执行可以恢复：** 持久异步 Run、Checkpoint、租约和明确终态，替代单次请求内不可恢复的循环。
+- **副作用受到约束：** Tool 必须经过 Registry、Schema、Policy、审批和幂等控制；未知结果进入人工处理。
+- **上下文保持可信：** Context、Memory 与 RAG 遵守固定信任顺序、权限过滤、来源追踪和生命周期策略。
+- **质量能够验证：** 稳定领域契约隔离框架变化，运行过程通过事件、Trace、指标和持续评测验证。
 
 <a id="capabilities"></a>
 
@@ -71,14 +82,10 @@ Platform。它不以演示 Tool Calling 为终点，而是为长时间运行、�
 
 以下均为已确认的设计范围，不代表已交付能力：
 
-- **Agent Runtime：** Code-first AgentSpec、不可变 AgentVersion、持久 Run、预算、取消和恢复。
-- **Model Gateway：** 能力校验、Structured Output、受控 Fallback、Token 与成本核算。
-- **Context & Memory：** 场景化上下文装配、Manifest、短期摘要和受治理长期记忆。
-- **RAG & Artifact：** pgvector 检索、权限过滤、Citation、S3 Artifact 和文档解析。
-- **Tool Execution：** Tool Registry、Policy、审批、幂等、超时、结果限制和 MCP 适配。
-- **Events & API：** REST Command、持久 RunEvent、SSE 断线续传和稳定 RunResult。
-- **Quality & Observability：** OpenTelemetry、Langfuse、数据集评测和 AgentVersion 发布门禁。
-- **Security & Operations：** 多租户、最小权限、脱敏、留存、OIDC/RBAC、Helm 和回滚。
+- **可恢复 Runtime：** Code-first AgentSpec、不可变 AgentVersion、持久 Run、预算、取消、Checkpoint、SSE 和稳定 RunResult。
+- **受治理智能：** 模型能力校验、Context Manifest、短期摘要、长期 Memory Policy、权限 RAG、Citation 和 Artifact。
+- **安全 Tool 执行：** Registry、Schema、Policy、审批、幂等、超时、结果限制、未知结果处理和 MCP 适配。
+- **质量与运营：** OpenTelemetry、Langfuse、持续评测、多租户、最小权限、数据治理、Helm 和可回滚发布。
 
 <a id="architecture"></a>
 
@@ -88,17 +95,13 @@ ZHIYI 采用模块化单体起步，API 与 Worker 独立进程，共享领域�
 PostgreSQL。LangGraph 负责执行恢复，产品数据库保存业务事实，Langfuse
 只负责观测和评测。
 
-```mermaid
-flowchart TB
-    Client["SDK / Console / Application"] --> API["Runtime API"]
-    API --> Queue["Durable Run Queue"]
-    Queue --> Worker["Runtime Worker"]
-    Worker --> Graph["LangGraph Execution"]
-    Graph --> Intelligence["LangChain Model Adapters<br/>Context / Memory / RAG"]
-    Graph --> Tools["Tool Registry / Policy / Approval"]
-    Graph --> Records["Run Events / PostgreSQL / Artifacts"]
-    Graph --> Observability["OpenTelemetry / Langfuse"]
-```
+<p align="center">
+  <img
+    src="./assets/banners/zhiyi-readme/runtime-architecture-1200x520.png"
+    alt="ZHIYI Runtime 架构：客户端依次经过 Runtime API、持久队列、Worker 和 LangGraph，最终生成 RunResult；模型与上下文、Tool 与 Policy、状态与可观测能力由运行时统一治理。"
+    width="100%"
+  >
+</p>
 
 | 组件 | 责任边界 |
 |---|---|
@@ -141,6 +144,33 @@ flowchart TB
 - [SDD 开发规范](./doc/SDD开发规范.md)：Spec Kit、设计漂移、Hooks 和 CI 操作流程。
 - [仓库 Agent 规则](./AGENTS.md)：AI 编程工具必须读取的强制入口。
 - [详细 Agent 工作规范](./doc/AGENTS.md)：工程、架构、测试、安全与完成标准。
+
+<a id="official-docs-site"></a>
+
+## 官网与文档门户
+
+`apps/docs/` 提供 Astro + Starlight 静态官网和文档门户。它通过显式白名单直接读取
+上述七份 `doc/*.md`，不会复制或改写正文；构建会校验路由、内部链接、锚点、
+Pagefind 搜索索引、响应式、键盘、明暗主题、可访问性和 Lighthouse 门槛。
+
+```bash
+corepack enable
+corepack install --global pnpm@11.22.0
+pnpm --dir apps/docs install --frozen-lockfile
+pnpm --dir apps/docs exec playwright install chromium
+pnpm --dir apps/docs dev
+```
+
+生产构建与完整质量检查：
+
+```bash
+pnpm --dir apps/docs build
+pnpm --dir apps/docs test:e2e
+pnpm --dir apps/docs quality
+```
+
+当前仅提供本地构建，仓库没有部署命令、公开域名或分析追踪。公开站点必须作为
+独立 Spec Kit Feature 明确审批，配置真实 `SITE_URL` 后再实施。
 
 <a id="development"></a>
 

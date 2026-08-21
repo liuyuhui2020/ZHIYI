@@ -1,0 +1,19 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+---
+
+<SiteLayout
+  title="页面未找到 · ZHIYI"
+  description="请求的 ZHIYI 页面不存在，请返回首页或进入项目文档。"
+  canonicalPath="/404.html"
+>
+  <section class="not-found site-shell">
+    <p class="eyebrow">404 / SIGNAL LOST</p>
+    <h1>这条执行路径不存在。</h1>
+    <p>目标可能已移动，或尚未进入当前方案基线。</p>
+    <div class="hero__actions">
+      <a class="button button--primary" href="/">返回首页</a>
+      <a class="button button--quiet" href="/docs/product-value/">进入文档</a>
+    </div>
+  </section>
+</SiteLayout>
