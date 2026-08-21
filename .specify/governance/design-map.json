@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "implementation_patterns": [
+    "src/**",
+    "tests/**",
+    "backend/**",
+    "frontend/**",
+    "apps/**",
+    "packages/**",
+    "scripts/**",
+    ".githooks/**",
+    ".claude/settings.json",
+    "migrations/**",
+    "alembic/**",
+    "infra/**",
+    "deploy/**",
+    ".github/workflows/**",
+    "pyproject.toml",
+    "uv.lock",
+    "package.json",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "Dockerfile",
+    "Dockerfile.*",
+    "docker-compose*.yml",
+    "docker-compose*.yaml"
+  ],
+  "ignore_patterns": [
+    ".agents/**",
+    ".claude/skills/**",
+    ".specify/**",
+    "specs/**",
+    "openspec/**",
+    "doc/**",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "README.md",
+    ".DS_Store"
+  ],
+  "document_patterns": [
+    "doc/*.md",
+    "doc/**/*.md",
+    "README.md",
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "required_artifacts": [
+    "spec.md",
+    "plan.md",
+    "tasks.md",
+    "drift-report.md"
+  ],
+  "blocking_placeholders": [
+    "[NEEDS CLARIFICATION",
+    "[FEATURE NAME]",
+    "[###-feature-name]",
+    "[DATE]",
+    "[ACTION REQUIRED]",
+    "[PROJECT_NAME]",
+    "[PRINCIPLE_",
+    "TXXX"
+  ],
+  "document_mappings": [
+    {
+      "implementation_patterns": [
+        "scripts/sdd/**",
+        ".githooks/**",
+        ".claude/settings.json",
+        ".github/workflows/sdd-governance.yml"
+      ],
+      "documents": [
+        "doc/SDD开发规范.md",
+        "doc/AGENTS.md",
+        "doc/PROJECT.md"
+      ]
+    },
+    {
+      "implementation_patterns": [
+        "src/zhiyi/domain/**",
+        "src/zhiyi/application/**"
+      ],
+      "documents": [
+        "doc/需求文档.md",
+        "doc/功能文档.md",
+        "doc/技术方案.md"
+      ]
+    },
+    {
+      "implementation_patterns": [
+        "src/zhiyi/runtime/**",
+        "src/zhiyi/adapters/models/**",
+        "src/zhiyi/adapters/context/**",
+        "src/zhiyi/adapters/memory/**",
+        "src/zhiyi/adapters/tools/**"
+      ],
+      "documents": [
+        "doc/功能文档.md",
+        "doc/技术方案.md"
+      ]
+    },
+    {
+      "implementation_patterns": [
+        "src/zhiyi/api/**",
+        "frontend/**"
+      ],
+      "documents": [
+        "doc/需求文档.md",
+        "doc/功能文档.md",
+        "doc/技术方案.md"
+      ]
+    },
+    {
+      "implementation_patterns": [
+        "migrations/**",
+        "alembic/**",
+        "infra/**",
+        "deploy/**"
+      ],
+      "documents": [
+        "doc/技术方案.md",
+        "doc/PROJECT.md"
+      ]
+    }
+  ],
+  "architecture_import_rules": [
+    {
+      "code": "ARCH-001",
+      "description": "Domain must be framework-free and depend on no outer layer.",
+      "path_patterns": [
+        "src/zhiyi/domain/*.py",
+        "src/zhiyi/domain/**/*.py"
+      ],
+      "forbidden_imports": [
+        "fastapi",
+        "pydantic",
+        "sqlalchemy",
+        "langchain*",
+        "langgraph*",
+        "langfuse*",
+        "openai",
+        "anthropic",
+        "zhiyi.application",
+        "zhiyi.runtime",
+        "zhiyi.adapters",
+        "zhiyi.api",
+        "zhiyi.infrastructure"
+      ]
+    },
+    {
+      "code": "ARCH-002",
+      "description": "Application may depend only on domain contracts and ports.",
+      "path_patterns": [
+        "src/zhiyi/application/*.py",
+        "src/zhiyi/application/**/*.py"
+      ],
+      "forbidden_imports": [
+        "fastapi",
+        "sqlalchemy",
+        "langchain*",
+        "langgraph*",
+        "langfuse*",
+        "openai",
+        "anthropic",
+        "zhiyi.runtime",
+        "zhiyi.adapters",
+        "zhiyi.api",
+        "zhiyi.infrastructure"
+      ]
+    },
+    {
+      "code": "ARCH-003",
+      "description": "Runtime orchestration uses ports instead of concrete adapters.",
+      "path_patterns": [
+        "src/zhiyi/runtime/*.py",
+        "src/zhiyi/runtime/**/*.py"
+      ],
+      "forbidden_imports": [
+        "fastapi",
+        "sqlalchemy",
+        "langfuse*",
+        "openai",
+        "anthropic",
+        "zhiyi.adapters",
+        "zhiyi.api",
+        "zhiyi.infrastructure"
+      ]
+    },
+    {
+      "code": "ARCH-004",
+      "description": "API calls application use cases and never concrete persistence/runtime frameworks.",
+      "path_patterns": [
+        "src/zhiyi/api/*.py",
+        "src/zhiyi/api/**/*.py"
+      ],
+      "forbidden_imports": [
+        "sqlalchemy",
+        "langchain*",
+        "langgraph*",
+        "openai",
+        "anthropic",
+        "zhiyi.adapters",
+        "zhiyi.runtime",
+        "zhiyi.infrastructure"
+      ]
+    }
+  ]
+}

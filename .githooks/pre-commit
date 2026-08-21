@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+sdd_repository_root=$(git rev-parse --show-toplevel)
+exec python3 "$sdd_repository_root/scripts/sdd/check_design_drift.py" \
+  --staged \
+  --gate commit \
+  --root "$sdd_repository_root"

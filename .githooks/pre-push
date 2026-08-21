@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+
+sdd_repository_root=$(git rev-parse --show-toplevel)
+sdd_base_ref=${SDD_BASE_REF:-origin/main}
+
+exec python3 "$sdd_repository_root/scripts/sdd/check_design_drift.py" \
+  --base-ref "$sdd_base_ref" \
+  --gate push \
+  --root "$sdd_repository_root"
