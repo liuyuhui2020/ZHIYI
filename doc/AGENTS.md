@@ -28,7 +28,7 @@
 
 开始任何项目工作前，按顺序阅读：
 
-1. `doc/README.md`
+1. `README.md`
 2. `doc/PROJECT.md`
 3. `doc/需求文档.md`
 4. `doc/功能文档.md`
