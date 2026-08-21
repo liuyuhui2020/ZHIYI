@@ -2,9 +2,9 @@
 
 **Feature**: 001-sdd-governance
 **Status**: ALIGNED
-**Docs-Impact**: UPDATED
-**Docs-Updated**: doc/SDD开发规范.md, doc/AGENTS.md, doc/README.md, doc/PROJECT.md, doc/需求文档.md, doc/技术方案.md
-**Docs-Impact-Reason**: 本功能改变了项目的开发事实源、AI 编程流程、提交门禁和进入产品实现阶段的条件，因此同步更新长期治理、需求和技术文档。
+**Docs-Impact**: NONE
+**Docs-Updated**: N/A
+**Docs-Impact-Reason**: 本次修正仅优化既有路径匹配和架构检查执行顺序，不改变已批准的门禁语义、产品设计或长期开发流程。
 **Reviewed-By**: AI
 
 ## Alignment Evidence
@@ -26,6 +26,10 @@
 
 最终测试集包含 29 个场景，并覆盖 5,000 变更路径小于 2 秒的门禁目标。
 
+GitHub Actions 首次运行暴露了 2.372 秒的性能回归。修正后，本地连续五次
+5,000 路径检查耗时为 0.444–0.554 秒；29 项测试和静态质量检查均通过。
+GitHub Actions 复验作为 T040 的剩余发布门禁。
+
 ## Intentional Differences
 
 - 本地实际 `python3` 为 3.9，因此治理检查器保持 Python 3.9+ 标准库兼容；
@@ -35,4 +39,4 @@
 
 ## Blocking Findings
 
-None.
+None. GitHub Actions 复验由 T040 跟踪，若失败则重新设为 BLOCKED。

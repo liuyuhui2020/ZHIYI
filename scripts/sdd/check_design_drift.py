@@ -150,8 +150,7 @@ def normalize_relative_path(path: str) -> str:
     return candidate.as_posix()
 
 
-def path_matches(path: str, pattern: str) -> bool:
-    path = normalize_relative_path(path)
+def _normalized_path_matches(path: str, pattern: str) -> bool:
     pattern = pattern.replace("\\", "/")
     if pattern.endswith("/**"):
         prefix = pattern[:-3].rstrip("/")
@@ -160,8 +159,16 @@ def path_matches(path: str, pattern: str) -> bool:
     return PurePosixPath(path).match(pattern) or fnmatch.fnmatchcase(path, pattern)
 
 
+def path_matches(path: str, pattern: str) -> bool:
+    return _normalized_path_matches(normalize_relative_path(path), pattern)
+
+
+def _matches_any_normalized(path: str, patterns: Iterable[str]) -> bool:
+    return any(_normalized_path_matches(path, pattern) for pattern in patterns)
+
+
 def matches_any(path: str, patterns: Iterable[str]) -> bool:
-    return any(path_matches(path, pattern) for pattern in patterns)
+    return _matches_any_normalized(normalize_relative_path(path), patterns)
 
 
 def _validate_policy(policy: Any) -> Dict[str, Any]:
@@ -261,11 +268,12 @@ def load_policy(root: Path, gate: str = "manual") -> Dict[str, Any]:
 
 
 def is_implementation_file(path: str, policy: Dict[str, Any]) -> bool:
-    if matches_any(path, PROTECTED_IMPLEMENTATION_PATTERNS):
+    normalized_path = normalize_relative_path(path)
+    if _matches_any_normalized(normalized_path, PROTECTED_IMPLEMENTATION_PATTERNS):
         return True
-    if matches_any(path, policy["ignore_patterns"]):
+    if _matches_any_normalized(normalized_path, policy["ignore_patterns"]):
         return False
-    return matches_any(path, policy["implementation_patterns"])
+    return _matches_any_normalized(normalized_path, policy["implementation_patterns"])
 
 
 def _run_git(
@@ -1033,6 +1041,13 @@ def validate_architecture(
     for relative_path in implementation_files:
         if not relative_path.endswith(".py"):
             continue
+        matching_rules = [
+            rule
+            for rule in rules
+            if _matches_any_normalized(relative_path, rule.get("path_patterns", []))
+        ]
+        if not matching_rules:
+            continue
         source_path = root / relative_path
         if gate == "commit":
             source = _read_index_text(root, relative_path)
@@ -1053,13 +1068,6 @@ def validate_architecture(
                     )
                 )
                 continue
-        matching_rules = [
-            rule
-            for rule in rules
-            if matches_any(relative_path, rule.get("path_patterns", []))
-        ]
-        if not matching_rules:
-            continue
         try:
             tree = ast.parse(source, filename=relative_path)
         except SyntaxError as error:

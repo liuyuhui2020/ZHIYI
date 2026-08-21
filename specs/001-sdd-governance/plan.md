@@ -84,6 +84,14 @@ Claude adapter returns a documented Stop Hook `decision: block` response and
 uses `stop_hook_active` to prevent infinite self-trigger loops; Git/CI remain the
 hard fallback if a repeated Stop is allowed.
 
+### Performance strategy
+
+Normalize each candidate path once per pattern set and filter architecture rules
+before touching the filesystem. Only Python files covered by at least one
+versioned architecture rule are read and parsed. This keeps large change sets
+linear in path count and avoids thousands of irrelevant filesystem metadata
+lookups on slower CI runners.
+
 ## Project Structure
 
 ### Documentation (this feature)

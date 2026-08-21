@@ -70,3 +70,8 @@
 - [x] T036 [US1] Let the commit gate accept synchronized documents already present in the current feature branch while still rejecting unstaged-only evidence in `scripts/sdd/check_design_drift.py` and `scripts/sdd/tests/test_design_drift.py` (partial)
 - [x] T037 [US2] Normalize Python relative imports before applying architecture boundaries in `scripts/sdd/check_design_drift.py` and `scripts/sdd/tests/test_design_drift.py` (partial)
 - [x] T038 [US1] Enforce exact task-path boundaries so similarly prefixed files cannot satisfy traceability in `scripts/sdd/check_design_drift.py` and `scripts/sdd/tests/test_design_drift.py` (partial)
+
+## Phase 8: GitHub CI Performance Correction
+
+- [x] T039 [US1] Normalize each path once per pattern set and skip filesystem reads for Python paths outside configured architecture rules in `scripts/sdd/check_design_drift.py`
+- [ ] T040 [US1] Re-run the 29-test suite, SC-007 benchmark, Git Hooks, and GitHub Actions workflow for `scripts/sdd/check_design_drift.py` and `scripts/sdd/tests/test_design_drift.py`
