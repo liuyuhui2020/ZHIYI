@@ -101,6 +101,38 @@ and 1920 pixels with keyboard-only input, both themes, reduced motion, and no JS
 - [x] T035 Re-run `$speckit-analyze`, resolve all critical/high findings, and confirm each changed implementation/test/document path is named in this file
 - [x] T036 Run `$speckit-converge`, append and complete any missing tasks, then update evidence and set `Status: ALIGNED` in `specs/002-docs-website/drift-report.md`
 
+## Phase 7: README Architecture Asset Refinement
+
+**Goal**: Make the README architecture visual a square, top-down five-layer map without changing the approved platform boundaries or implying Runtime delivery.
+
+**Independent Test**: The generated image is exactly 1200×1200 pixels, presents 客户端 → 渠道 → 服务端 → Agent 核心 → 基础设施层 in that order, and the README references the square asset with matching alternative text.
+
+- [x] T037 [US1] Redesign and verify the README architecture visual in `assets/banners/zhiyi-readme/source.html`, replace `assets/banners/zhiyi-readme/runtime-architecture-1200x520.png` with `assets/banners/zhiyi-readme/runtime-architecture-1200x1200.png`, and update `README.md`
+
+## Phase 8: README Brand Identity Refinement
+
+**Goal**: Replace the README promotional header with one distinctive, theme-aware ZHIYI logo lockup that expresses recoverable signal flow without changing product claims.
+
+**Independent Test**: The README begins with only the centered logo; light and dark variants share identical geometry, contain no font or external-resource dependency, parse as valid SVG, and remain legible when rendered at 16, 24, 32, and 128 pixels for the mark and at the README display width for the lockup.
+
+- [x] T038 [US1] Design and verify the theme-aware ZHIYI logo lockup in `assets/brand/zhiyi-logo-light.svg` and `assets/brand/zhiyi-logo-dark.svg`, replace the promotional header at the top of `README.md`, and record alignment evidence in `specs/002-docs-website/drift-report.md`
+
+## Phase 9: README Architecture Layout Simplification
+
+**Goal**: Remove the left-side layer introductions from the square README architecture visual while preserving the top-down five-group structure and approved component boundaries.
+
+**Independent Test**: The generated image remains exactly 1200×1200 pixels, contains no left-side layer label column, keeps all component cards readable, and preserves an unobstructed downward flow between the five groups.
+
+- [x] T039 [US1] Remove the left-side layer introductions and re-render the architecture asset in `assets/banners/zhiyi-readme/source.html` and `assets/banners/zhiyi-readme/runtime-architecture-1200x1200.png`
+
+## Phase 10: README Architecture Copy Removal
+
+**Goal**: Remove all visible header copy from the square README architecture visual and use the released space for the five component groups.
+
+**Independent Test**: The generated image remains exactly 1200×1200 pixels, contains no visible architecture title, layer-sequence subtitle, or design-baseline badge, and keeps all five groups fully visible without clipping.
+
+- [x] T040 [US1] Remove the top architecture copy, move the component groups upward, and re-render `assets/banners/zhiyi-readme/source.html` and `assets/banners/zhiyi-readme/runtime-architecture-1200x1200.png`
+
 ## Dependencies and Execution Order
 
 - Phase 1 establishes the toolchain and blocks all later phases.
@@ -115,7 +147,7 @@ and 1920 pixels with keyboard-only input, both themes, reduced motion, and no JS
 
 | Coverage | Tasks |
 |---|---|
-| FR-001, FR-003; SC-001, SC-009 | T011-T017, T033 |
+| FR-001, FR-003; SC-001, SC-009 | T011-T017, T033, T037-T040 |
 | FR-002, FR-004, FR-006 | T013, T016, T018, T020 |
 | FR-005; SC-002, SC-003 | T018, T020-T022 |
 | FR-007, FR-008, FR-009, FR-010; SC-004, SC-005, SC-006 | T023-T027, T031 |

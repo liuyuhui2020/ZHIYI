@@ -453,124 +453,114 @@
     .plane-node.n3 { left: 24px; bottom: 32px; }
     .plane-node.n4 { right: 24px; bottom: 32px; }
 
-    /* Branded runtime architecture visual used by the README. */
+    /* Square, top-down runtime architecture visual used by the README. */
     #runtime {
       width: 1200px;
-      height: 520px;
+      height: 1200px;
       background:
-        radial-gradient(circle at 50% 50%, rgba(124, 108, 255, 0.14), transparent 32%),
+        radial-gradient(circle at 50% 34%, rgba(124, 108, 255, 0.12), transparent 30%),
+        radial-gradient(circle at 86% 88%, rgba(45, 212, 215, 0.07), transparent 24%),
         linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
         linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px),
         var(--ink-950);
-      background-size: auto, 32px 32px, 32px 32px, auto;
+      background-size: auto, auto, 32px 32px, 32px 32px, auto;
       color: var(--slate-50);
     }
 
-    .runtime-head {
+    #runtime::after {
       position: absolute;
-      top: 38px;
-      left: 48px;
-    }
-
-    .runtime-head h2 {
-      margin: 0;
-      font: 750 24px/1 var(--font-body);
-      letter-spacing: -0.025em;
-    }
-
-    .runtime-head p {
-      margin: 10px 0 0;
-      color: #8294aa;
-      font: 500 12px/1 var(--font-mono);
-      letter-spacing: 0.1em;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(180deg, transparent 4%, rgba(124, 108, 255, 0.035) 50%, transparent 94%);
+      content: "";
     }
 
     .runtime-stage {
       position: absolute;
-      top: 122px;
-      left: 48px;
-      right: 48px;
-      height: 342px;
-    }
-
-    .runtime-spine {
-      position: absolute;
-      top: 133px;
-      left: 55px;
-      right: 55px;
-      height: 2px;
-      background: linear-gradient(90deg, var(--cyan), var(--indigo), var(--amber));
-      box-shadow: 0 0 18px rgba(124, 108, 255, 0.35);
-    }
-
-    .runtime-step {
-      position: absolute;
-      top: 92px;
+      z-index: 1;
+      top: 56px;
+      left: 56px;
+      right: 56px;
       display: grid;
-      place-items: center;
-      width: 126px;
-      height: 82px;
-      border: 1px solid #243952;
-      border-radius: 12px;
-      background: #0c1a2c;
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
-      color: #e9eff7;
-      text-align: center;
-      font: 650 13px/1.35 var(--font-mono);
+      grid-template-rows: 160px 160px 180px 220px 200px;
+      gap: 24px;
     }
 
-    .runtime-step::before {
+    .runtime-layer {
+      --accent: var(--cyan);
+      position: relative;
+      min-width: 0;
+      border: 1px solid #213650;
+      border-left: 3px solid var(--accent);
+      border-radius: 14px;
+      background: rgba(9, 23, 40, 0.94);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.18);
+    }
+
+    .runtime-layer:not(:last-child)::after {
       position: absolute;
-      top: -7px;
+      z-index: 3;
+      bottom: -25px;
       left: 50%;
-      width: 12px;
-      height: 12px;
+      width: 24px;
+      height: 24px;
       transform: translateX(-50%);
-      border: 2px solid var(--ink-950);
+      border: 1px solid color-mix(in srgb, var(--accent) 55%, #213650);
       border-radius: 50%;
-      background: var(--cyan);
-      content: "";
-    }
-
-    .runtime-step.s1 { left: 0; }
-    .runtime-step.s2 { left: 184px; }
-    .runtime-step.s3 { left: 368px; }
-    .runtime-step.s4 { left: 552px; }
-    .runtime-step.s5 { left: 736px; }
-    .runtime-step.s6 { right: 0; }
-    .runtime-step.s3::before,
-    .runtime-step.s4::before { background: var(--indigo); }
-    .runtime-step.s5::before,
-    .runtime-step.s6::before { background: var(--amber); }
-
-    .runtime-rail {
-      position: absolute;
-      top: 218px;
-      width: 248px;
-      min-height: 96px;
-      padding: 18px 20px;
-      border-top: 2px solid var(--accent);
-      border-radius: 0 0 10px 10px;
-      background: rgba(13, 29, 48, 0.88);
-    }
-
-    .runtime-rail h3 {
-      margin: 0 0 9px;
+      background: var(--ink-950);
       color: var(--accent);
-      font: 700 12px/1 var(--font-mono);
-      letter-spacing: 0.09em;
+      content: "↓";
+      font: 700 15px/22px var(--font-mono);
+      text-align: center;
     }
 
-    .runtime-rail p {
-      margin: 0;
-      color: #8ea0b7;
-      font-size: 12px;
-      line-height: 1.45;
+    .runtime-layer.channel { --accent: #57b7ee; }
+    .runtime-layer.server { --accent: var(--indigo); }
+    .runtime-layer.agent { --accent: #a98cff; }
+    .runtime-layer.infrastructure { --accent: var(--amber); }
+
+    .runtime-nodes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-content: center;
+      gap: 12px;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      padding: 22px 28px;
     }
 
-    .runtime-rail.r1 { --accent: var(--cyan); left: 92px; }
-    .runtime-rail.r2 { --accent: var(--indigo); left: 397px; }
-    .runtime-rail.r3 { --accent: var(--amber); right: 92px; }
+    .runtime-layer.server .runtime-nodes {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .runtime-node {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 62px;
+      padding: 12px 10px;
+      border: 1px solid #29415e;
+      border-radius: 10px;
+      background: #0d1d31;
+      color: #dce6f2;
+      text-align: center;
+      font: 650 12px/1.45 var(--font-mono);
+    }
+
+    .runtime-node.wide {
+      grid-column: span 2;
+    }
+
+    .runtime-footnote {
+      position: absolute;
+      z-index: 2;
+      right: 56px;
+      bottom: 31px;
+      color: #657992;
+      font: 600 10px/1 var(--font-mono);
+      letter-spacing: 0.08em;
+    }
   </style>
 </head>
 <body>
@@ -687,29 +677,56 @@
     </div>
   </section>
 
-  <section id="runtime" class="artboard" role="img" aria-label="ZHIYI runtime architecture">
-    <div class="runtime-head">
-      <h2>Runtime architecture</h2>
-      <p>COMMAND → DURABLE EXECUTION → GOVERNED CAPABILITIES → OBSERVABLE RESULT</p>
-    </div>
+  <section id="runtime" class="artboard" role="img" aria-label="ZHIYI 架构分层：客户端、渠道、服务端、Agent 核心和基础设施层自上而下排列">
     <div class="runtime-stage" aria-hidden="true">
-      <div class="runtime-spine"></div>
-      <div class="runtime-step s1">SDK / Console</div>
-      <div class="runtime-step s2">Runtime API</div>
-      <div class="runtime-step s3">Durable Queue</div>
-      <div class="runtime-step s4">Worker</div>
-      <div class="runtime-step s5">LangGraph</div>
-      <div class="runtime-step s6">RunResult</div>
-      <div class="runtime-rail r1"><h3>MODEL &amp; CONTEXT</h3><p>Capability-aware models, governed context, memory and RAG.</p></div>
-      <div class="runtime-rail r2"><h3>TOOLS &amp; POLICY</h3><p>Registry, schema, approval, idempotency and resolution.</p></div>
-      <div class="runtime-rail r3"><h3>STATE &amp; OBSERVABILITY</h3><p>PostgreSQL, artifacts, events, OpenTelemetry and Langfuse.</p></div>
+      <div class="runtime-layer client">
+        <div class="runtime-nodes">
+          <div class="runtime-node">Python SDK</div>
+          <div class="runtime-node">Developer Console</div>
+          <div class="runtime-node">Business Application</div>
+        </div>
+      </div>
+      <div class="runtime-layer channel">
+        <div class="runtime-nodes">
+          <div class="runtime-node">REST Commands</div>
+          <div class="runtime-node">SSE Event Stream</div>
+          <div class="runtime-node">API Key / OIDC</div>
+        </div>
+      </div>
+      <div class="runtime-layer server">
+        <div class="runtime-nodes">
+          <div class="runtime-node">Runtime API</div>
+          <div class="runtime-node">Run Scheduler</div>
+          <div class="runtime-node">Runtime Worker</div>
+          <div class="runtime-node">Event Projector</div>
+        </div>
+      </div>
+      <div class="runtime-layer agent">
+        <div class="runtime-nodes">
+          <div class="runtime-node">AgentSpec / AgentVersion</div>
+          <div class="runtime-node">LangGraph Runtime</div>
+          <div class="runtime-node">Context / Memory / RAG</div>
+          <div class="runtime-node">Model Gateway</div>
+          <div class="runtime-node wide">Tool Registry / Policy / Approval</div>
+        </div>
+      </div>
+      <div class="runtime-layer infrastructure">
+        <div class="runtime-nodes">
+          <div class="runtime-node">PostgreSQL + pgvector</div>
+          <div class="runtime-node">LangGraph Checkpoint</div>
+          <div class="runtime-node">S3 Artifact Storage</div>
+          <div class="runtime-node">OpenTelemetry / Langfuse</div>
+          <div class="runtime-node wide">Model Providers / MCP Servers</div>
+        </div>
+      </div>
     </div>
+    <div class="runtime-footnote">LOGICAL LAYERS · MODULAR MONOLITH · API AND WORKER SCALE INDEPENDENTLY</div>
   </section>
 
   <script>
     const variant = new URLSearchParams(window.location.search).get("variant") || "resumable";
     const dimensions = variant === "runtime"
-      ? [1200, 520]
+      ? [1200, 1200]
       : variant === "resumable-mobile"
         ? [720, 360]
         : [1440, 420];

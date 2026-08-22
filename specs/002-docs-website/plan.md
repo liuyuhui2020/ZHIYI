@@ -200,7 +200,8 @@ apps/docs/
     └── e2e/{accessibility,site}.spec.ts
 .github/workflows/docs-website.yml
 README.md
-assets/banners/zhiyi-readme/{source.html,resumable-orbit-1440x420.png,resumable-orbit-mobile-720x360.png,runtime-architecture-1200x520.png}
+assets/brand/{zhiyi-logo-dark.svg,zhiyi-logo-light.svg}
+assets/banners/zhiyi-readme/{source.html,resumable-orbit-1440x420.png,resumable-orbit-mobile-720x360.png,runtime-architecture-1200x1200.png}
 doc/PROJECT.md
 ```
 

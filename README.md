@@ -1,45 +1,14 @@
 <h1 align="center">
   <picture>
-    <source media="(max-width: 600px)" srcset="./assets/banners/zhiyi-readme/resumable-orbit-mobile-720x360.png">
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/brand/zhiyi-logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./assets/brand/zhiyi-logo-light.svg">
     <img
-      src="./assets/banners/zhiyi-readme/resumable-orbit-1440x420.png"
-      alt="ZHIYI — Reliable agent execution, beyond the demo."
-      width="100%"
+      src="./assets/brand/zhiyi-logo-light.svg"
+      alt="ZHIYI"
+      width="440"
     >
   </picture>
 </h1>
-
-<div align="center">
-  <p>For agent developers and platform teams building long-running tasks that must be recoverable, governed, approvable, auditable, and continuously evaluated.</p>
-  <p><strong>Design baseline and engineering governance phase · Product runtime not yet implemented</strong></p>
-  <p>
-    <a href="./doc/PROJECT.md"><strong>View the current status and roadmap</strong></a> ·
-    <a href="./doc/技术方案.md">Explore the technical architecture</a> ·
-    <a href="#official-docs-site">Preview the official site locally</a>
-  </p>
-  <p>
-    <a href="https://github.com/liuyuhui2020/ZHIYI/actions/workflows/sdd-governance.yml">
-      <img alt="SDD Governance" src="https://github.com/liuyuhui2020/ZHIYI/actions/workflows/sdd-governance.yml/badge.svg?branch=main">
-    </a>
-    <a href="https://github.com/liuyuhui2020/ZHIYI/actions/workflows/docs-website.yml">
-      <img alt="Documentation Website" src="https://github.com/liuyuhui2020/ZHIYI/actions/workflows/docs-website.yml/badge.svg?branch=main">
-    </a>
-    <img alt="Project stage: design baseline" src="https://img.shields.io/badge/stage-design%20baseline-7c6cff?style=flat-square">
-    <img alt="Python target: 3.12" src="https://img.shields.io/badge/Python-target%203.12-0f766e?style=flat-square&amp;logo=python&amp;logoColor=white">
-    <img alt="SDD: Spec Kit" src="https://img.shields.io/badge/SDD-Spec%20Kit-334155?style=flat-square">
-  </p>
-</div>
-
-<p align="center">
-  <a href="#overview">Overview</a> ·
-  <a href="#why-zhiyi">Design Goals</a> ·
-  <a href="#capabilities">Capabilities</a> ·
-  <a href="#architecture">Architecture</a> ·
-  <a href="#roadmap">Roadmap</a> ·
-  <a href="#documentation">Documentation</a> ·
-  <a href="#official-docs-site">Official Site</a> ·
-  <a href="#development">Contribute</a>
-</p>
 
 ---
 
@@ -115,9 +84,9 @@ observability and evaluation.
 
 <p align="center">
   <img
-    src="./assets/banners/zhiyi-readme/runtime-architecture-1200x520.png"
-    alt="ZHIYI runtime architecture: clients flow through the Runtime API, persistent queue, worker, and LangGraph to produce a RunResult; the runtime governs models and context, tools and policy, state, and observability."
-    width="100%"
+    src="./assets/banners/zhiyi-readme/runtime-architecture-1200x1200.png"
+    alt="ZHIYI five-layer architecture, ordered from top to bottom: clients, channels, server, Agent core, and infrastructure; the diagram is a design baseline, not an implemented runtime."
+    width="720"
   >
 </p>
 

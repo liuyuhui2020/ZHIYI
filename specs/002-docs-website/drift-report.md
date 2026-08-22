@@ -4,13 +4,13 @@
 **Status**: ALIGNED
 **Docs-Impact**: UPDATED
 **Docs-Updated**: README.md, doc/PROJECT.md
-**Docs-Impact-Reason**: 官网新增独立静态工程、本地构建入口、单一事实源发布边界和质量门禁；README 与 PROJECT 已同步当前完成状态，并明确 Runtime 未实现且网站未部署。
+**Docs-Impact-Reason**: 官网新增独立静态工程、本地构建入口、单一事实源发布边界和质量门禁；README 与 PROJECT 已同步当前完成状态，README 顶部收敛为主题自适应品牌标志，并继续明确 Runtime 未实现且网站未部署。
 **Reviewed-By**: AI
 
 ## Alignment Evidence
 
 - Requirements and success criteria checked: all 18 functional requirements,
-  10 success criteria, and 15 acceptance scenarios are covered by the 36 tasks
+  10 success criteria, and 15 acceptance scenarios are covered by the 40 tasks
   and their tests or explicit verification steps.
 - Plan sections checked: static architecture, single-source loader, local
   Pagefind, Chinese locale boundary, responsive/accessibility behavior,
@@ -21,6 +21,25 @@
   test, configuration, lockfile, `.github/workflows/docs-website.yml`, and
   README visual asset path is named by a task. Final `$speckit-analyze` found
   no Critical or High issue.
+- README architecture refinement: T037 replaces the wide execution pipeline
+  with a 1200×1200 top-down map ordered 客户端 → 渠道 → 服务端 → Agent 核心 →
+  基础设施层. The editable HTML source, generated PNG, README reference, and
+  alternative text remain synchronized; the README text and image alternative
+  text retain the explicit design-baseline/not-implemented context.
+- README architecture simplification: T039 removes the five left-side layer
+  introduction columns, expands the component-card grids to the full available
+  width, and centers the downward connectors without changing component order
+  or responsibility boundaries.
+- README architecture copy removal: T040 removes the visible title, layer
+  sequence, and design-baseline badge from the top of the image and moves all
+  five component groups upward without changing the accessible description or
+  the README maturity disclosure.
+- README brand refinement: T038 replaces the promotional header, badges, and
+  local anchor rail with one centered ZHIYI logo lockup. Its light/dark SVGs
+  use identical path geometry, contain no font or external-resource dependency,
+  pass XML validation, select correctly through `prefers-color-scheme`, and
+  remain legible in 16/24/32/128-pixel mark renders and at the 440-pixel README
+  lockup width. Product maturity remains explicit at the start of Overview.
 - Convergence result: all 18 FRs, 10 SCs, 15 acceptance scenarios, plan
   decisions, and eight constitution principles were checked; no missing,
   partial, contradictory, or unrequested work was found, so no convergence
@@ -42,8 +61,9 @@
   suite, and quality workflow completed within the 10-minute target. The CI
   workflow is non-deploying and uses Node 24.
 - Governance evidence: all 29 SDD checker unit tests pass; the final manual
-  worktree drift gate passes and checks all 29 implementation files for
-  Feature `002-docs-website`.
+  worktree drift gate passes. T037 through T040 change only governed documentation
+  and visual assets, so the checker reports zero product implementation files
+  for this incremental work.
 - 30-second first-visit comprehension check (2026-08-21): PASS. In a
   first-viewport, read-only review, the reviewer identified the positioning as
   a reliable production-oriented Agent Runtime design baseline; the maturity
