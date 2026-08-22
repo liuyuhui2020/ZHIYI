@@ -1,14 +1,46 @@
-<h1 align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/brand/zhiyi-logo-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="./assets/brand/zhiyi-logo-light.svg">
-    <img
-      src="./assets/brand/zhiyi-logo-light.svg"
-      alt="ZHIYI"
-      width="440"
-    >
-  </picture>
-</h1>
+<div align="center">
+  <h1>
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="./assets/brand/zhiyi-logo-dark.svg">
+      <source media="(prefers-color-scheme: light)" srcset="./assets/brand/zhiyi-logo-light.svg">
+      <img
+        src="./assets/brand/zhiyi-logo-light.svg"
+        alt="ZHIYI"
+        width="220"
+      >
+    </picture>
+  </h1>
+  <p>
+    <strong>Self-hosted Agent Runtime Platform for recoverable, governed execution</strong><br>
+    <sub>Design baseline · Product Runtime implementation has not started</sub>
+  </p>
+  <p>
+    <a href="./doc/PROJECT.md"><strong>Roadmap</strong></a> ·
+    <a href="./doc/技术方案.md"><strong>Architecture</strong></a> ·
+    <a href="./doc/需求文档.md"><strong>Requirements</strong></a> ·
+    <a href="./doc/SDD开发规范.md"><strong>Development Guide</strong></a>
+  </p>
+  <p>
+    <img alt="Project stage: design baseline" src="https://img.shields.io/badge/stage-design%20baseline-f59e0b?style=flat-square">
+    <img alt="Python target: 3.12" src="https://img.shields.io/badge/Python-target%203.12-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white">
+    <img alt="FastAPI target" src="https://img.shields.io/badge/FastAPI-target-009688?style=flat-square&amp;logo=fastapi&amp;logoColor=white">
+    <img alt="LangChain target" src="https://img.shields.io/badge/LangChain-target-1C3C3C?style=flat-square">
+    <img alt="LangGraph target" src="https://img.shields.io/badge/LangGraph-target-0F766E?style=flat-square">
+    <img alt="PostgreSQL and pgvector target" src="https://img.shields.io/badge/PostgreSQL%20%2B%20pgvector-target-4169E1?style=flat-square&amp;logo=postgresql&amp;logoColor=white">
+    <img alt="SDD: Spec Kit established" src="https://img.shields.io/badge/SDD-Spec%20Kit-6f42c1?style=flat-square">
+  </p>
+</div>
+
+<p align="center">
+  <a href="#overview">Overview</a> ·
+  <a href="#why-zhiyi">Design Goals</a> ·
+  <a href="#capabilities">Capabilities</a> ·
+  <a href="#architecture">Architecture</a> ·
+  <a href="#roadmap">Roadmap</a> ·
+  <a href="#documentation">Documentation</a> ·
+  <a href="#official-docs-site">Official Site</a> ·
+  <a href="#development">Contribute</a>
+</p>
 
 ---
 

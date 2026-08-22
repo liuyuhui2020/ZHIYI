@@ -4,13 +4,13 @@
 **Status**: ALIGNED
 **Docs-Impact**: UPDATED
 **Docs-Updated**: README.md, doc/PROJECT.md
-**Docs-Impact-Reason**: 官网新增独立静态工程、本地构建入口、单一事实源发布边界和质量门禁；README 与 PROJECT 已同步当前完成状态，README 顶部收敛为主题自适应品牌标志，并继续明确 Runtime 未实现且网站未部署。
+**Docs-Impact-Reason**: 官网新增独立静态工程、本地构建入口、单一事实源发布边界和质量门禁；README 与 PROJECT 已同步当前完成状态，README 顶部使用紧凑的主题自适应品牌标志、目标技术栈和导航，并继续明确 Runtime 未实现且网站未部署。
 **Reviewed-By**: AI
 
 ## Alignment Evidence
 
 - Requirements and success criteria checked: all 18 functional requirements,
-  10 success criteria, and 15 acceptance scenarios are covered by the 40 tasks
+  10 success criteria, and 15 acceptance scenarios are covered by the 42 tasks
   and their tests or explicit verification steps.
 - Plan sections checked: static architecture, single-source loader, local
   Pagefind, Chinese locale boundary, responsive/accessibility behavior,
@@ -34,12 +34,24 @@
   sequence, and design-baseline badge from the top of the image and moves all
   five component groups upward without changing the accessible description or
   the README maturity disclosure.
+- README architecture contrast refinement: T041 replaces the dark canvas and
+  cards with a light blue-gray technical grid, white group surfaces, pale node
+  cards, and dark labels while preserving the five accent colors, component
+  order, connectors, and accessible description.
 - README brand refinement: T038 replaces the promotional header, badges, and
   local anchor rail with one centered ZHIYI logo lockup. Its light/dark SVGs
   use identical path geometry, contain no font or external-resource dependency,
   pass XML validation, select correctly through `prefers-color-scheme`, and
   remain legible in 16/24/32/128-pixel mark renders and at the 440-pixel README
   lockup width. Product maturity remains explicit at the start of Overview.
+- README header hierarchy refinement: T042 supersedes T038's logo-only
+  presentation, reduces the lockup from 440 to 220 pixels, and restores four
+  core-document links, seven maturity/target-stack badges, and eight working
+  section anchors. Browser checks at 1000 pixels in both themes and at 390
+  pixels confirm correct logo selection, successful image loading, natural
+  badge/navigation wrapping, and no horizontal overflow. Planned technologies
+  are consistently labeled `target`, while the design-baseline state and the
+  unimplemented Product Runtime remain explicit in the header.
 - Convergence result: all 18 FRs, 10 SCs, 15 acceptance scenarios, plan
   decisions, and eight constitution principles were checked; no missing,
   partial, contradictory, or unrequested work was found, so no convergence
@@ -61,7 +73,7 @@
   suite, and quality workflow completed within the 10-minute target. The CI
   workflow is non-deploying and uses Node 24.
 - Governance evidence: all 29 SDD checker unit tests pass; the final manual
-  worktree drift gate passes. T037 through T040 change only governed documentation
+  worktree drift gate passes. T037 through T042 change only governed documentation
   and visual assets, so the checker reports zero product implementation files
   for this incremental work.
 - 30-second first-visit comprehension check (2026-08-21): PASS. In a

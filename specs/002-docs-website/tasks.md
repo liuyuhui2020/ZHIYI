@@ -133,6 +133,22 @@ and 1920 pixels with keyboard-only input, both themes, reduced motion, and no JS
 
 - [x] T040 [US1] Remove the top architecture copy, move the component groups upward, and re-render `assets/banners/zhiyi-readme/source.html` and `assets/banners/zhiyi-readme/runtime-architecture-1200x1200.png`
 
+## Phase 11: README Architecture Contrast Refinement
+
+**Goal**: Replace the overly dark architecture palette with a high-contrast light technical palette while preserving the square layout and component hierarchy.
+
+**Independent Test**: The generated image remains exactly 1200×1200 pixels, uses a light background with dark readable labels, keeps the five accent colors distinguishable, and has no clipped or overlapping cards or connectors.
+
+- [x] T041 [US1] Apply a light high-contrast palette and re-render `assets/banners/zhiyi-readme/source.html` and `assets/banners/zhiyi-readme/runtime-architecture-1200x1200.png`
+
+## Phase 12: README Header Information Hierarchy
+
+**Goal**: Supersede T038's logo-only presentation by reducing the logo footprint and restoring a compact project header with technology/status badges and working documentation and section navigation.
+
+**Independent Test**: The README header renders a theme-aware logo no wider than 240 pixels, exposes roadmap/architecture/requirements/development-guide links, labels planned technologies as the target stack, restores all major section anchors, and keeps the design-baseline maturity explicit without reinstating the previous long promotional block.
+
+- [x] T042 [US1] Replace the T038 logo-only header with a smaller logo, target-stack badges, documentation links, and section navigation at the top of `README.md`, and record verification evidence in `specs/002-docs-website/drift-report.md`
+
 ## Dependencies and Execution Order
 
 - Phase 1 establishes the toolchain and blocks all later phases.
@@ -147,7 +163,7 @@ and 1920 pixels with keyboard-only input, both themes, reduced motion, and no JS
 
 | Coverage | Tasks |
 |---|---|
-| FR-001, FR-003; SC-001, SC-009 | T011-T017, T033, T037-T040 |
+| FR-001, FR-003; SC-001, SC-009 | T011-T017, T033, T037-T042 |
 | FR-002, FR-004, FR-006 | T013, T016, T018, T020 |
 | FR-005; SC-002, SC-003 | T018, T020-T022 |
 | FR-007, FR-008, FR-009, FR-010; SC-004, SC-005, SC-006 | T023-T027, T031 |
