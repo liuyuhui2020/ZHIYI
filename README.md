@@ -10,12 +10,12 @@
 </h1>
 
 <div align="center">
-  <p>面向 Agent 开发者与平台团队，让长时运行任务可恢复、可约束、可审批、可审计、可持续评测。</p>
-  <p><strong>方案基线与工程治理阶段 · 产品 Runtime 尚未实现</strong></p>
+  <p>For agent developers and platform teams building long-running tasks that must be recoverable, governed, approvable, auditable, and continuously evaluated.</p>
+  <p><strong>Design baseline and engineering governance phase · Product runtime not yet implemented</strong></p>
   <p>
-    <a href="./doc/PROJECT.md"><strong>查看当前状态与路线图</strong></a> ·
-    <a href="./doc/技术方案.md">阅读技术架构</a> ·
-    <a href="#official-docs-site">本地预览官网</a>
+    <a href="./doc/PROJECT.md"><strong>View the current status and roadmap</strong></a> ·
+    <a href="./doc/技术方案.md">Explore the technical architecture</a> ·
+    <a href="#official-docs-site">Preview the official site locally</a>
   </p>
   <p>
     <a href="https://github.com/liuyuhui2020/ZHIYI/actions/workflows/sdd-governance.yml">
@@ -31,127 +31,164 @@
 </div>
 
 <p align="center">
-  <a href="#overview">项目概览</a> ·
-  <a href="#why-zhiyi">设计目标</a> ·
-  <a href="#capabilities">核心能力</a> ·
-  <a href="#architecture">架构</a> ·
-  <a href="#roadmap">路线图</a> ·
-  <a href="#documentation">文档</a> ·
-  <a href="#official-docs-site">官网</a> ·
-  <a href="#development">参与设计与开发</a>
+  <a href="#overview">Overview</a> ·
+  <a href="#why-zhiyi">Design Goals</a> ·
+  <a href="#capabilities">Capabilities</a> ·
+  <a href="#architecture">Architecture</a> ·
+  <a href="#roadmap">Roadmap</a> ·
+  <a href="#documentation">Documentation</a> ·
+  <a href="#official-docs-site">Official Site</a> ·
+  <a href="#development">Contribute</a>
 </p>
 
 ---
 
 <a id="overview"></a>
 
-## 项目概览
+## Overview
 
 > [!IMPORTANT]
-> ZHIYI 当前处于**方案基线与工程治理阶段**。仓库已经建立产品设计、
-> Spec Kit SDD、设计漂移检查、Git Hooks 和 CI，但产品 Runtime、API、
-> SDK 与控制台尚未开始实现。本文描述的是已确认设计目标，不代表现有可运行能力。
+> ZHIYI is currently in the **design baseline and engineering governance phase**.
+> The repository includes the product design, Spec Kit SDD workflow, design-drift
+> checks, Git hooks, and CI. The product runtime, API, SDK, and console have not
+> entered implementation. This README describes approved design goals, not
+> currently available runtime capabilities.
 
-ZHIYI 面向 Agent 开发者和平台团队，目标是建设自托管的 Agent Runtime
-Platform。它不以演示 Tool Calling 为终点，而是为长时间运行、存在外部副作用、
-需要恢复和审计的 Agent 任务设计稳定执行底座。
+ZHIYI is a self-hosted agent runtime platform for agent developers and platform
+teams. It goes beyond demonstration-level tool calling by providing a stable
+execution foundation for long-running agent tasks that involve external side
+effects and require recovery and auditing.
 
-| 当前仓库内容 | 状态 |
+| Repository area | Status |
 |---|:---:|
-| 产品价值、需求、功能和技术方案 | 已建立基线 |
-| Spec Kit、设计漂移检查、Git/Claude Hooks、CI | 已建立 |
-| 官网与文档门户 | 本地静态构建已完成，尚未部署 |
-| Runtime、REST/SSE、Worker、Checkpoint | M0 计划 |
-| Context、Memory、RAG、Tool 审批、Langfuse | M1 计划 |
-| MCP、Subagent、OIDC/RBAC、Helm、生产门禁 | M2 计划 |
+| Product value, requirements, functional design, and technical design | Baselined |
+| Spec Kit, design-drift checks, Git/Claude hooks, and CI | Established |
+| Official website and documentation portal | Local static build complete; not deployed |
+| Runtime, REST/SSE, worker, and checkpointing | Planned for M0 |
+| Context, memory, RAG, tool approvals, and Langfuse | Planned for M1 |
+| MCP, subagents, OIDC/RBAC, Helm, and production gates | Planned for M2 |
 
 <a id="why-zhiyi"></a>
 
-## 设计目标与差异
+## Design Goals and Differentiators
 
-以下差异是项目的**设计方向**，将在 M0–M2 按阶段验证：
+The following differentiators are the project's **design direction** and will
+be validated incrementally across M0–M2:
 
-- **执行可以恢复：** 持久异步 Run、Checkpoint、租约和明确终态，替代单次请求内不可恢复的循环。
-- **副作用受到约束：** Tool 必须经过 Registry、Schema、Policy、审批和幂等控制；未知结果进入人工处理。
-- **上下文保持可信：** Context、Memory 与 RAG 遵守固定信任顺序、权限过滤、来源追踪和生命周期策略。
-- **质量能够验证：** 稳定领域契约隔离框架变化，运行过程通过事件、Trace、指标和持续评测验证。
+- **Recoverable execution:** Persistent asynchronous runs, checkpoints, leases,
+  and explicit terminal states replace unrecoverable loops confined to a single
+  request.
+- **Governed side effects:** Every tool passes through a registry, schema
+  validation, policy checks, approval, and idempotency controls. Unknown outcomes
+  require human resolution.
+- **Trustworthy context:** Context, memory, and RAG follow a fixed trust order,
+  permission filters, provenance tracking, and lifecycle policies.
+- **Verifiable quality:** Stable domain contracts isolate framework changes,
+  while events, traces, metrics, and continuous evaluation verify runtime
+  behavior.
 
 <a id="capabilities"></a>
 
-## 核心能力
+## Core Capabilities
 
-以下均为已确认的设计范围，不代表已交付能力：
+The following items are approved design scope, not delivered capabilities:
 
-- **可恢复 Runtime：** Code-first AgentSpec、不可变 AgentVersion、持久 Run、预算、取消、Checkpoint、SSE 和稳定 RunResult。
-- **受治理智能：** 模型能力校验、Context Manifest、短期摘要、长期 Memory Policy、权限 RAG、Citation 和 Artifact。
-- **安全 Tool 执行：** Registry、Schema、Policy、审批、幂等、超时、结果限制、未知结果处理和 MCP 适配。
-- **质量与运营：** OpenTelemetry、Langfuse、持续评测、多租户、最小权限、数据治理、Helm 和可回滚发布。
+- **Recoverable runtime:** Code-first `AgentSpec`, immutable `AgentVersion`,
+  persistent runs, budgets, cancellation, checkpoints, SSE, and a stable
+  `RunResult`.
+- **Governed intelligence:** Model capability validation, context manifests,
+  short-term summarization, long-term memory policy, permission-aware RAG,
+  citations, and artifacts.
+- **Safe tool execution:** Registry, schemas, policy, approval, idempotency,
+  timeouts, result limits, unknown-outcome handling, and MCP adapters.
+- **Quality and operations:** OpenTelemetry, Langfuse, continuous evaluation,
+  multi-tenancy, least privilege, data governance, Helm, and reversible releases.
 
 <a id="architecture"></a>
 
-## 架构
+## Architecture
 
-ZHIYI 采用模块化单体起步，API 与 Worker 独立进程，共享领域模型和
-PostgreSQL。LangGraph 负责执行恢复，产品数据库保存业务事实，Langfuse
-只负责观测和评测。
+ZHIYI starts as a modular monolith with separate API and worker processes that
+share a domain model and PostgreSQL. LangGraph provides execution recovery, the
+product database stores business facts, and Langfuse is used only for
+observability and evaluation.
 
 <p align="center">
   <img
     src="./assets/banners/zhiyi-readme/runtime-architecture-1200x520.png"
-    alt="ZHIYI Runtime 架构：客户端依次经过 Runtime API、持久队列、Worker 和 LangGraph，最终生成 RunResult；模型与上下文、Tool 与 Policy、状态与可观测能力由运行时统一治理。"
+    alt="ZHIYI runtime architecture: clients flow through the Runtime API, persistent queue, worker, and LangGraph to produce a RunResult; the runtime governs models and context, tools and policy, state, and observability."
     width="100%"
   >
 </p>
 
-| 组件 | 责任边界 |
+| Component | Responsibility boundary |
 |---|---|
-| **ZHIYI Domain** | 拥有 Tenant、Agent、Run、Tool、Approval、Memory、Artifact 和 Event 语义 |
-| **LangGraph** | Graph 执行、Checkpoint、Interrupt 和恢复，不是业务事实源 |
-| **LangChain** | 模型、消息、Tool Schema、Structured Output 和 Provider 生态适配 |
-| **Langfuse** | Trace、Prompt 实验和评测；不可用时不得影响 Run 正确性 |
-| **PostgreSQL** | 产品业务事实、Run 队列、事件、租约和向量数据 |
+| **ZHIYI Domain** | Owns the semantics of tenants, agents, runs, tools, approvals, memory, artifacts, and events |
+| **LangGraph** | Provides graph execution, checkpoints, interrupts, and recovery; it is not the source of business truth |
+| **LangChain** | Adapts models, messages, tool schemas, structured output, and the provider ecosystem |
+| **Langfuse** | Provides traces, prompt experiments, and evaluations; an outage must not affect run correctness |
+| **PostgreSQL** | Stores product facts, the run queue, events, leases, and vector data |
 
-完整设计见 [技术方案](./doc/技术方案.md)。
+See the [technical design](./doc/技术方案.md) for the complete architecture.
 
 <a id="roadmap"></a>
 
-## 路线图
+## Roadmap
 
-- **治理基线（当前）：** 建立方案事实源与 SDD 门禁；以 Spec Kit、Hooks、漂移检查和 CI 通过为退出标准。
-- **M0 · Runtime Alpha：** 证明 Agent Loop 可可靠执行和恢复；验证 Worker 故障恢复、SSE 续传、预算终止和状态机。
-- **M1 · Platform Beta：** 跑通企业知识与操作 Agent；形成 RAG、Memory、审批写 Tool、Langfuse 和最小控制台闭环。
-- **M2 · Production V1：** 满足生产部署与治理要求；完成 SLO、升级兼容、安全审计、备份恢复和回滚演练。
+- **Governance baseline (current):** Establish authoritative design sources and
+  SDD gates, with passing Spec Kit, hook, drift-check, and CI evidence as exit
+  criteria.
+- **M0 · Runtime Alpha:** Prove that the agent loop can execute and recover
+  reliably. Validate worker failure recovery, SSE resumption, budget termination,
+  and the run state machine.
+- **M1 · Platform Beta:** Complete the enterprise knowledge-and-operations agent
+  flow, including RAG, memory, approved write tools, Langfuse, and a minimal
+  console.
+- **M2 · Production V1:** Meet production deployment and governance requirements,
+  including SLOs, upgrade compatibility, security auditing, backup and recovery,
+  and rollback exercises.
 
-阶段范围、风险和已确认决策见 [PROJECT.md](./doc/PROJECT.md)。
+See [PROJECT.md](./doc/PROJECT.md) for milestone scope, risks, and approved
+decisions.
 
 <a id="documentation"></a>
 
-## 文档导航
+## Documentation
 
-### 快速了解
+### Start Here
 
-- [产品价值](./doc/产品价值.md)：为什么做、为谁创造价值、如何验证价值。
-- [项目说明与路线图](./doc/PROJECT.md)：当前状态、阶段范围、风险和已确认决策。
+- [Product Value](./doc/产品价值.md): Why ZHIYI should exist, who it serves, and
+  how its value will be validated.
+- [Project Status and Roadmap](./doc/PROJECT.md): Current status, milestone scope,
+  risks, and approved decisions.
 
-### 评估产品与技术
+### Evaluate the Product and Architecture
 
-- [需求文档](./doc/需求文档.md)：产品范围、功能要求、非功能目标和验收标准。
-- [功能文档](./doc/功能文档.md)：用户流程、对象行为和功能边界。
-- [技术方案](./doc/技术方案.md)：架构、状态、数据、可靠性、安全和部署设计。
+- [Requirements](./doc/需求文档.md): Product scope, functional and non-functional
+  requirements, and acceptance criteria.
+- [Functional Design](./doc/功能文档.md): User flows, object behavior, and
+  functional boundaries.
+- [Technical Design](./doc/技术方案.md): Architecture, state, data, reliability,
+  security, and deployment design.
 
-### 参与设计与开发
+### Contribute to Design and Development
 
-- [SDD 开发规范](./doc/SDD开发规范.md)：Spec Kit、设计漂移、Hooks 和 CI 操作流程。
-- [仓库 Agent 规则](./AGENTS.md)：AI 编程工具必须读取的强制入口。
-- [详细 Agent 工作规范](./doc/AGENTS.md)：工程、架构、测试、安全与完成标准。
+- [SDD Development Guide](./doc/SDD开发规范.md): Spec Kit, design drift, hooks,
+  and CI procedures.
+- [Repository Agent Rules](./AGENTS.md): Mandatory entry point for AI coding
+  tools.
+- [Detailed Agent Guidelines](./doc/AGENTS.md): Engineering, architecture,
+  testing, security, and completion standards.
 
 <a id="official-docs-site"></a>
 
-## 官网与文档门户
+## Official Website and Documentation Portal
 
-`apps/docs/` 提供 Astro + Starlight 静态官网和文档门户。它通过显式白名单直接读取
-上述七份 `doc/*.md`，不会复制或改写正文；构建会校验路由、内部链接、锚点、
-Pagefind 搜索索引、响应式、键盘、明暗主题、可访问性和 Lighthouse 门槛。
+`apps/docs/` contains the Astro + Starlight static website and documentation
+portal. An explicit allowlist loads the seven `doc/*.md` sources directly,
+without copying or rewriting their bodies. The build validates routes, internal
+links, anchors, the Pagefind search index, responsive layouts, keyboard access,
+light and dark themes, accessibility, and Lighthouse thresholds.
 
 ```bash
 corepack enable
@@ -161,7 +198,7 @@ pnpm --dir apps/docs exec playwright install chromium
 pnpm --dir apps/docs dev
 ```
 
-生产构建与完整质量检查：
+Production build and full quality checks:
 
 ```bash
 pnpm --dir apps/docs build
@@ -169,18 +206,23 @@ pnpm --dir apps/docs test:e2e
 pnpm --dir apps/docs quality
 ```
 
-当前仅提供本地构建，仓库没有部署命令、公开域名或分析追踪。公开站点必须作为
-独立 Spec Kit Feature 明确审批，配置真实 `SITE_URL` 后再实施。
+Only local builds are currently supported. The repository contains no deployment
+command, public domain, or analytics tracking. A public site requires explicit
+approval through a separate Spec Kit feature and a real `SITE_URL` before
+implementation.
 
 <a id="development"></a>
 
-## 参与设计与开发
+## Contributing to Design and Development
 
-当前可参与产品文档、Spec Kit 工件、架构评审和治理工具改进。产品 Runtime
-仍未获准进入实现，任何产品代码必须先完成对应 Feature 的设计门禁并获得明确批准。
+Contributions are currently welcome for product documentation, Spec Kit
+artifacts, architecture reviews, and governance tooling. The product runtime has
+not been approved for implementation; all product code must pass the design gates
+for its feature and receive explicit approval first.
 
-当前仓库尚无产品安装和启动命令。参与文档与治理工作时，首次克隆后安装版本化
-Git Hooks：
+The repository does not yet provide product installation or startup commands.
+After cloning the repository for documentation or governance work, install the
+versioned Git hooks:
 
 ```bash
 git clone https://github.com/liuyuhui2020/ZHIYI.git
@@ -188,14 +230,15 @@ cd ZHIYI
 ./scripts/sdd/install_hooks.sh
 ```
 
-任何产品实现开始前必须：
+Before any product implementation begins:
 
-1. 阅读本 README、[PROJECT.md](./doc/PROJECT.md) 和核心产品文档。
-2. 解决 M0 对应的待确认事项。
-3. 使用 `$speckit-specify` 创建独立 Feature。
-4. 完成 `spec → plan → tasks → analyze` 并建立失败测试。
-5. 填写 `drift-report.md`，通过本地设计漂移检查。
-6. 获得明确的“进入实现”批准后再运行 `$speckit-implement`。
+1. Read this README, [PROJECT.md](./doc/PROJECT.md), and the core product documents.
+2. Resolve the outstanding decisions for the relevant M0 scope.
+3. Create a separate feature with `$speckit-specify`.
+4. Complete `spec → plan → tasks → analyze` and establish failing tests.
+5. Complete `drift-report.md` and pass the local design-drift check.
+6. Obtain explicit approval to enter implementation before running
+   `$speckit-implement`.
 
 ```bash
 python3 scripts/sdd/check_design_drift.py --worktree --gate manual
@@ -203,16 +246,18 @@ python3 -m unittest discover -s scripts/sdd/tests -v
 ```
 
 > [!CAUTION]
-> 不得使用 `--no-verify`、削弱 CI、绕过 Spec Kit，或通过伪造
-> `ALIGNED` 报告压制真实设计漂移。
+> Do not use `--no-verify`, weaken CI, bypass Spec Kit, or suppress genuine
+> design drift with a fabricated `ALIGNED` report.
 
-## 许可证与公开状态
+## License and Public Status
 
-项目目前为私有方案阶段，许可证尚未确定。在许可证正式选定前，不应将仓库
-内容视为已授权的开源软件，也不应对外发布第三方受限代码。
+The project is currently private and in the design phase; a license has not yet
+been selected. Until a license is formally adopted, do not treat repository
+content as authorized open-source software or publicly distribute restricted
+third-party code.
 
 ---
 
 <div align="center">
-  <sub>Reliable Agent execution, beyond the demo.</sub>
+  <sub>Reliable agent execution, beyond the demo.</sub>
 </div>
