@@ -324,16 +324,16 @@ body.site-home summary {
   transform: translateY(-2px);
 }
 
-.button--primary {
+body.site-home .button--primary {
   border-color: var(--signal);
   background: var(--signal);
-  color: var(--ink-950) !important;
+  color: var(--ink-950);
   font-weight: 760;
 }
 
-.button--primary:hover {
+body.site-home .button--primary:hover {
   background: transparent;
-  color: var(--site-text) !important;
+  color: var(--site-text);
 }
 
 .button--quiet:hover {
@@ -515,11 +515,11 @@ body.site-home summary {
   line-height: 1.8;
 }
 
-.text-link {
+body.site-home .text-link {
   display: inline-flex;
   gap: 10px;
   margin-top: 20px;
-  color: var(--site-signal-text) !important;
+  color: var(--site-signal-text);
   text-underline-offset: 5px;
 }
 
