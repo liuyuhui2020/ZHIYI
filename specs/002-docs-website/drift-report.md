@@ -57,14 +57,15 @@
   partial, contradictory, or unrequested work was found, so no convergence
   task was appended.
 - Static and content evidence: Astro reports 0 errors, 0 warnings, and 0 hints;
-  13 content-pipeline unit tests pass; the production build generates 9 pages;
+  17 content-pipeline unit tests pass; the production build generates 9 pages;
   the validator passes all 8 required routes, internal targets, anchors,
   canonical URLs, sitemap, and Pagefind output.
-- Browser evidence: all 28 Playwright/axe scenarios pass, including seven deep
+- Browser evidence: all 31 Playwright/axe scenarios pass, including seven deep
   routes, the seven-document search matrix, Chinese and English search,
   no-results recovery, no external runtime requests, 320/768/1280/1920 px
-  layouts, keyboard flow, both themes, reduced motion, JavaScript-disabled
-  content, and local lazy Mermaid rendering.
+  layouts, keyboard flow, mobile navigation, system-theme fallback when storage
+  is unavailable, the 404 recovery path, both themes, reduced motion,
+  JavaScript-disabled content, and local lazy Mermaid rendering.
 - Quality evidence: the latest three Lighthouse runs for `/` and three for
   `/docs/architecture/` each score 1.00 for performance, accessibility, best
   practices, and SEO, above the required 0.90 medians.
