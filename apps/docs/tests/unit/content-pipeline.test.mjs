@@ -44,6 +44,25 @@ test('manifest rejects duplicate source paths and route IDs', () => {
   assert.throws(() => validateDocumentManifest(duplicateId), /duplicate route/i);
 });
 
+test('manifest rejects empty and malformed publishing entries', () => {
+  assert.throws(() => validateDocumentManifest([]), /at least one source/i);
+
+  const valid = DOCUMENTS[0];
+  const invalidCases = [
+    [{ ...valid, sourcePath: '../private.md' }, /invalid documentation source path/i],
+    [{ ...valid, id: 'Docs/Invalid' }, /invalid documentation route ID/i],
+    [{ ...valid, description: 'too short' }, /description is too short/i],
+    [{ ...valid, sidebarLabel: '' }, /sidebar label is required/i],
+    [{ ...valid, group: 'unknown' }, /unknown documentation group/i],
+    [{ ...valid, order: 0 }, /unique positive integer/i],
+    [{ ...valid, status: 'released' }, /unknown content status/i],
+  ];
+
+  for (const [entry, expectedError] of invalidCases) {
+    assert.throws(() => validateDocumentManifest([entry]), expectedError);
+  }
+});
+
 test('sidebar is derived from the manifest and exposes every document once', () => {
   const sidebar = createSidebar(DOCUMENTS);
   const slugs = sidebar.flatMap((group) => group.items ?? []).flatMap((item) => item.slug ?? []);
@@ -77,6 +96,23 @@ test('heading extraction reports the source when no H1 exists', () => {
   assert.throws(
     () => extractTitleAndBody('## Only a subsection', 'doc/missing.md'),
     /doc\/missing\.md.*level-one heading/i,
+  );
+});
+
+test('heading extraction handles CRLF and tilde fences and rejects ambiguous titles', () => {
+  const source = '~~~markdown\r\n# Fenced title\r\n~~~\r\n\r\n# Real Title\r\n\r\nBody.';
+  const result = extractTitleAndBody(source, 'doc/example.md');
+
+  assert.equal(result.title, 'Real Title');
+  assert.match(result.body, /# Fenced title/);
+  assert.doesNotMatch(result.body, /\r/);
+  assert.throws(
+    () => extractTitleAndBody('# First\n\n# Second', 'doc/duplicate.md'),
+    /only one level-one heading/i,
+  );
+  assert.throws(
+    () => extractTitleAndBody('# **` `**', 'doc/empty.md'),
+    /cannot be empty/i,
   );
 });
 
@@ -157,6 +193,37 @@ test('external and hash-only links are unchanged', () => {
   }
 });
 
+test('repository links reject invalid encoding and preserve query and directory targets', async () => {
+  const sandbox = await createFixtureRepository();
+  try {
+    assert.throws(
+      () => resolveRepositoryLink({
+        url: './%ZZ.md',
+        sourcePath: join(sandbox, 'doc/source.md'),
+        repositoryRoot: sandbox,
+        documents: [],
+      }),
+      /invalid encoded link/i,
+    );
+
+    assert.equal(resolveRepositoryLink({
+      url: './target.md?view=compact#section-two',
+      sourcePath: join(sandbox, 'doc/source.md'),
+      repositoryRoot: sandbox,
+      documents: [{ sourcePath: 'doc/target.md', id: 'docs/target' }],
+    }), '/docs/target/?view=compact#section-two');
+
+    assert.equal(resolveRepositoryLink({
+      url: '.',
+      sourcePath: join(sandbox, 'doc/source.md'),
+      repositoryRoot: sandbox,
+      documents: [],
+    }), 'https://github.com/liuyuhui2020/ZHIYI/tree/main/doc');
+  } finally {
+    await rm(sandbox, { recursive: true, force: true });
+  }
+});
+
 test('Satteri adapter rewrites links using the current source file URL', async () => {
   const sandbox = await createFixtureRepository();
   try {
@@ -180,6 +247,14 @@ test('Satteri adapter rewrites links using the current source file URL', async (
   }
 });
 
+test('Satteri adapter requires source context before rewriting links', () => {
+  const plugin = repositoryLinksSatteri({ repositoryRoot: '/repo', documents: [] });
+  assert.throws(
+    () => plugin.link({ type: 'link', url: './target.md' }, { setProperty() {} }),
+    /requires a source file URL/i,
+  );
+});
+
 test('Mermaid Satteri adapter preserves a readable, escaped no-script fallback', () => {
   const plugin = createMermaidSatteriPlugin();
   const transformed = plugin.code({
@@ -192,6 +267,7 @@ test('Mermaid Satteri adapter preserves a readable, escaped no-script fallback',
   assert.match(transformed.value, /<pre class="mermaid"/);
   assert.match(transformed.value, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
   assert.doesNotMatch(transformed.value, /<script>/);
+  assert.equal(plugin.code({ type: 'code', lang: 'text', value: 'plain' }), undefined);
 });
 
 async function createFixtureRepository() {

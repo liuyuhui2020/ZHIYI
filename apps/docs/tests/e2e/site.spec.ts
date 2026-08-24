@@ -151,6 +151,41 @@ test('explicit theme selection persists between homepage and documentation', asy
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 });
 
+test('homepage respects system theme when storage is unavailable', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.addInitScript(() => {
+    Storage.prototype.getItem = () => {
+      throw new Error('storage unavailable');
+    };
+  });
+  await page.goto('/');
+
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+});
+
+test('mobile navigation opens and reaches a documentation destination', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+
+  const mobileNavigation = page.locator('.mobile-nav');
+  await mobileNavigation.locator('summary[aria-label="打开主导航"]').click();
+  await expect(mobileNavigation.getByRole('navigation', { name: '主导航' })).toBeVisible();
+  await mobileNavigation.getByRole('link', { name: '架构', exact: true }).click();
+
+  await expect(page).toHaveURL('/docs/architecture/');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('技术方案');
+});
+
+test('not-found page explains the error and offers working recovery actions', async ({ page }) => {
+  const response = await page.goto('/missing-route-for-acceptance');
+
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('执行路径不存在');
+  await expect(page.getByRole('link', { name: '返回首页' })).toHaveAttribute('href', '/');
+  await page.locator('#main-content').getByRole('link', { name: '进入文档' }).click();
+  await expect(page).toHaveURL('/docs/product-value/');
+});
+
 test('reduced motion disables decorative animation', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
