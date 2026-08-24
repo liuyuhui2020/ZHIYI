@@ -19,6 +19,13 @@ htmlcov/
 .venv/
 venv/
 node_modules/
+.astro/
+dist/
+playwright-report/
+test-results/
+.lighthouseci/
+.playwright-cli/
+output/playwright/
 .idea/
 .vscode/
 *.swp

@@ -1,0 +1,64 @@
+---
+import BrandMark from './BrandMark.astro';
+import { REPOSITORY_URL } from '../lib/document-manifest.mjs';
+
+const links = [
+  { label: '产品价值', href: '/docs/product-value/' },
+  { label: '架构', href: '/docs/architecture/' },
+  { label: '路线图', href: '/docs/roadmap/' },
+  { label: '进入文档', href: '/docs/product-value/' },
+];
+---
+
+<header class="site-header">
+  <div class="site-shell site-header__inner">
+    <a class="site-brand" href="/" aria-label="ZHIYI 官网首页">
+      <BrandMark />
+      <span class="site-brand__state">DESIGN BASELINE</span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="主导航">
+      {links.map((link) => <a href={link.href}>{link.label}</a>)}
+      <a class="nav-github" href={REPOSITORY_URL}>GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+
+    <div class="header-controls">
+      <button class="theme-toggle" type="button" aria-label="切换为浅色主题" aria-pressed="false" data-theme-toggle>
+        <span class="theme-toggle__dark" aria-hidden="true">◐</span>
+        <span class="theme-toggle__light" aria-hidden="true">○</span>
+      </button>
+      <details class="mobile-nav">
+        <summary aria-label="打开主导航"><span aria-hidden="true">菜单</span></summary>
+        <nav aria-label="主导航">
+          {links.map((link) => <a href={link.href}>{link.label}</a>)}
+          <a href={REPOSITORY_URL}>GitHub ↗</a>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  const applyTheme = (theme: 'light' | 'dark') => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    if (!toggle) return;
+    const next = theme === 'dark' ? '浅色' : '深色';
+    toggle.setAttribute('aria-label', `切换为${next}主题`);
+    toggle.setAttribute('aria-pressed', String(theme === 'light'));
+  };
+
+  toggle?.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try {
+      localStorage.setItem('zhiyi-theme', next);
+      localStorage.setItem('starlight-theme', next);
+    } catch {
+      // Theme still applies for the current page when storage is unavailable.
+    }
+  });
+
+  applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+</script>

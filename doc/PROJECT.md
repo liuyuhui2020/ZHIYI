@@ -1,7 +1,7 @@
 # ZHIYI Agent Runtime Platform 项目说明
 
 > 当前阶段：方案基线与工程治理
-> 项目状态：产品编码未开始；SDD 治理已建立
+> 项目状态：产品编码未开始；SDD 治理与本地官网构建已建立，官网尚未部署
 > 文档版本：v0.1
 > 更新日期：2026-08-21
 
@@ -35,10 +35,11 @@ ZHIYI 是一个面向开发者、自托管、基于 LangChain 生态的 Agent Ru
 - 形成首版产品和技术文档。
 - 初始化官方 Spec Kit，并安装 Codex 和 Claude Code 集成。
 - 建立项目宪法、设计漂移检查器、Git/Claude Hooks 和 CI 门禁。
+- 建立 `apps/docs/` 静态官网与文档门户、Pagefind 搜索、响应式与质量门禁。
 
 ### 未开始
 
-- 工程脚手架和依赖锁定。
+- 产品 Runtime 工程脚手架和依赖锁定。
 - 数据库 Schema 与迁移。
 - Runtime、API、Worker 和 Console 实现。
 - 测试、压测、安全审计和部署。
@@ -48,6 +49,16 @@ ZHIYI 是一个面向开发者、自托管、基于 LangChain 生态的 Agent Ru
 `openspec/changes/build-langchain-agent-platform/` 中存在较早的 OpenSpec 草案。
 该草案形成于完整方案确认和 Spec Kit 治理之前，只能作为历史输入。所有新
 实现必须使用 `specs/NNN-feature-name/`，不能继续扩展该旧草案。
+
+### 官网发布边界
+
+- 官网工程位于 `apps/docs/`，使用 Astro、Starlight、Pagefind 和本地 Mermaid 渲染。
+- 网站只发布显式白名单内的七份 `doc/*.md`；正文仍以 `doc/` 为唯一事实源，
+  不维护副本、符号链接或不受治理的目录级自动公开。
+- 本地生产构建会检查内容适配、路由、内部链接、锚点、搜索、浏览器流程、
+  明暗主题、可访问性和 Lighthouse 四类分数。
+- 当前没有部署工作流、公开 URL、分析追踪或真实线上 canonical；任何部署都必须
+  通过新的 Spec Kit Feature 审批并配置真实 `SITE_URL`。
 
 ## 4. 项目目标
 
@@ -206,6 +217,7 @@ M1 只面向可信开发或试点环境，不开放通用外部生产流量。
 | D-032 | 简单 Tool Loop，复杂任务启用 Planning | 已确认 |
 | D-033 | 生产 Agent 禁止自我修改 | 已确认 |
 | D-034 | RunResult 为稳定结构化契约 | 已确认 |
+| D-035 | 官网采用静态单一事实源发布，不在本 Feature 中部署 | 已确认 |
 
 ## 9. 风险登记
 
@@ -221,6 +233,7 @@ M1 只面向可信开发或试点环境，不开放通用外部生产流量。
 | AI 编码与设计静默漂移 | 中 | 高 | Spec Kit、漂移报告、Git/AI Hook、CI | 全阶段 |
 | 本地 Hook 或仓库内 CI 被主动绕过 | 中 | 高 | 远端 Ruleset、Required Check、治理路径评审 | 建仓后 |
 | 多租户越权 | 中 | 极高 | Tenant Context、RBAC、负向测试 | M2 |
+| 官网误公开内部文档或正文漂移 | 低 | 高 | 显式白名单、只读加载、构建链接与漂移门禁 | 每次官网变更 |
 
 ## 10. 待确认事项
 

@@ -1,0 +1,14 @@
+---
+import mark from '../assets/brand-mark.svg';
+
+interface Props {
+  label?: string;
+}
+
+const { label = 'ZHIYI' } = Astro.props;
+---
+
+<span class="brand-mark">
+  <img src={mark.src} width="40" height="40" alt="" aria-hidden="true" />
+  <span class="brand-mark__text">{label}</span>
+</span>

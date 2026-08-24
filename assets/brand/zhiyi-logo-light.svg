@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 200" role="img" aria-labelledby="title desc">
+  <title id="title">ZHIYI</title>
+  <desc id="desc">A continuous Z-to-Y signal path with three checkpoints beside the ZHIYI wordmark.</desc>
+  <g id="mark">
+    <path fill="none" stroke="#071012" stroke-linecap="round" stroke-linejoin="round" stroke-width="18" d="M42 48h104l-70 70h42m0 0 36-36m-36 36v38"/>
+    <g fill="#0B8F84">
+      <circle cx="42" cy="48" r="11"/>
+      <circle cx="118" cy="118" r="11"/>
+      <circle cx="118" cy="156" r="11"/>
+    </g>
+  </g>
+  <g id="wordmark" fill="#071012">
+    <path d="M214 52h76v18l-52 60h52v18h-76v-18l52-60h-52z"/>
+    <path d="M318 52h20v38h40V52h20v96h-20v-40h-40v40h-20z"/>
+    <path d="M426 52h20v96h-20z"/>
+    <path d="M474 52h24l16 30 16-30h24l-30 50v46h-20v-46z"/>
+    <path d="M582 52h20v96h-20z"/>
+  </g>
+</svg>

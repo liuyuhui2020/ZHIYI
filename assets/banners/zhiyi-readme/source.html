@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>ZHIYI README visual assets</title>
+  <style>
+    :root {
+      --ink-950: #07111f;
+      --ink-900: #0b1728;
+      --ink-800: #12233a;
+      --slate-50: #f8fafc;
+      --slate-200: #dbe4f0;
+      --slate-400: #91a1b7;
+      --slate-600: #4d6078;
+      --indigo: #7c6cff;
+      --indigo-strong: #5847e8;
+      --cyan: #2dd4d7;
+      --amber: #f4b942;
+      --font-display: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+      --font-body: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family: var(--font-body);
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      background: #030712;
+    }
+
+    .artboard {
+      display: none;
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    body[data-variant="resumable"] #resumable,
+    body[data-variant="resumable-mobile"] #resumable-mobile,
+    body[data-variant="ledger"] #ledger,
+    body[data-variant="control"] #control,
+    body[data-variant="runtime"] #runtime {
+      display: block;
+    }
+
+    .hero {
+      width: 1440px;
+      height: 420px;
+    }
+
+    .hero-mobile {
+      width: 720px;
+      height: 360px;
+    }
+
+    .hero-copy {
+      position: absolute;
+      z-index: 3;
+      left: 88px;
+      top: 66px;
+      width: 660px;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+      color: var(--slate-400);
+      font: 600 14px/1 var(--font-mono);
+      letter-spacing: 0.14em;
+    }
+
+    .eyebrow .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 11px;
+      border-radius: 999px;
+      background: rgba(124, 108, 255, 0.12);
+      color: #c5bcff;
+      letter-spacing: 0.08em;
+    }
+
+    .eyebrow .status::before {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--amber);
+      box-shadow: 0 0 12px rgba(244, 185, 66, 0.55);
+      content: "";
+    }
+
+    .wordmark {
+      margin: 0;
+      color: var(--slate-50);
+      font: 900 92px/0.84 var(--font-display);
+      letter-spacing: -0.065em;
+    }
+
+    .tagline {
+      margin: 24px 0 0;
+      color: #b8c5d6;
+      font-size: 24px;
+      line-height: 1.35;
+      letter-spacing: -0.02em;
+    }
+
+    .tagline strong {
+      color: var(--slate-50);
+      font-weight: 650;
+    }
+
+    .verb-row {
+      display: flex;
+      gap: 28px;
+      margin-top: 34px;
+      color: #7f91a8;
+      font: 600 12px/1 var(--font-mono);
+      letter-spacing: 0.16em;
+    }
+
+    .verb-row span {
+      position: relative;
+      padding-left: 13px;
+    }
+
+    .verb-row span::before {
+      position: absolute;
+      left: 0;
+      top: 2px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--cyan);
+      content: "";
+    }
+
+    /* Direction A: recovery is shown as an interrupted orbit that resumes. */
+    #resumable {
+      background:
+        radial-gradient(circle at 78% 42%, rgba(45, 212, 215, 0.12), transparent 25%),
+        radial-gradient(circle at 60% -20%, rgba(124, 108, 255, 0.18), transparent 35%),
+        linear-gradient(125deg, #07111f 0%, #091524 58%, #06101d 100%);
+      color: var(--slate-50);
+    }
+
+    #resumable::before {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.2;
+      background-image:
+        linear-gradient(rgba(148, 163, 184, 0.16) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.16) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.25) 48%, #000 100%);
+      content: "";
+    }
+
+    #resumable::after {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 51%;
+      width: 1px;
+      background: linear-gradient(transparent, rgba(124, 108, 255, 0.42), transparent);
+      content: "";
+    }
+
+    .orbit-visual {
+      position: absolute;
+      z-index: 2;
+      top: 20px;
+      right: 36px;
+      width: 660px;
+      height: 380px;
+    }
+
+    .orbit-visual text {
+      font-family: var(--font-mono);
+    }
+
+    #resumable-mobile {
+      background:
+        radial-gradient(circle at 78% 55%, rgba(45, 212, 215, 0.15), transparent 32%),
+        radial-gradient(circle at 48% -25%, rgba(124, 108, 255, 0.2), transparent 45%),
+        linear-gradient(130deg, #07111f 0%, #091524 100%);
+      color: var(--slate-50);
+    }
+
+    #resumable-mobile::before {
+      position: absolute;
+      inset: 0;
+      opacity: 0.15;
+      background-image:
+        linear-gradient(rgba(148, 163, 184, 0.18) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.18) 1px, transparent 1px);
+      background-size: 32px 32px;
+      content: "";
+    }
+
+    .mobile-copy {
+      position: absolute;
+      z-index: 3;
+      top: 38px;
+      left: 42px;
+      width: 390px;
+    }
+
+    .mobile-copy .eyebrow {
+      margin-bottom: 24px;
+      font-size: 11px;
+    }
+
+    .mobile-copy .wordmark {
+      font-size: 72px;
+    }
+
+    .mobile-copy .tagline {
+      margin-top: 20px;
+      font-size: 20px;
+    }
+
+    .mobile-copy .verb-row {
+      gap: 18px;
+      margin-top: 27px;
+      font-size: 9px;
+    }
+
+    .mobile-orbit {
+      position: absolute;
+      z-index: 2;
+      right: 10px;
+      bottom: -4px;
+      width: 330px;
+      height: 232px;
+      opacity: 0.95;
+    }
+
+    /* Direction B: execution represented as a readable, auditable ledger. */
+    #ledger {
+      background:
+        linear-gradient(90deg, transparent 47px, rgba(79, 70, 229, 0.08) 48px, transparent 49px),
+        repeating-linear-gradient(0deg, #f8fafc 0, #f8fafc 31px, #e6eaf2 32px);
+      color: #101a2d;
+    }
+
+    #ledger .hero-copy {
+      top: 59px;
+      width: 610px;
+    }
+
+    #ledger .eyebrow { color: #64748b; }
+
+    #ledger .eyebrow .status {
+      border: 1px solid #d7d9ff;
+      background: #efefff;
+      color: #4738c8;
+    }
+
+    #ledger .wordmark { color: #101a2d; }
+
+    #ledger .tagline { color: #4d6078; }
+
+    #ledger .tagline strong { color: #101a2d; }
+
+    #ledger .verb-row { color: #66778e; }
+
+    .ledger-panel {
+      position: absolute;
+      top: 44px;
+      right: 66px;
+      width: 615px;
+      height: 332px;
+      overflow: hidden;
+      border: 1px solid #cdd5e2;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 22px 60px rgba(41, 50, 77, 0.13);
+    }
+
+    .ledger-head {
+      display: grid;
+      grid-template-columns: 88px 1fr 92px;
+      padding: 18px 22px;
+      border-bottom: 1px solid #dfe5ed;
+      color: #7a899d;
+      font: 600 11px/1 var(--font-mono);
+      letter-spacing: 0.12em;
+    }
+
+    .ledger-row {
+      display: grid;
+      grid-template-columns: 88px 1fr 92px;
+      align-items: center;
+      min-height: 59px;
+      padding: 0 22px;
+      border-bottom: 1px solid #e6ebf1;
+      color: #263349;
+      font: 600 14px/1.2 var(--font-mono);
+    }
+
+    .ledger-seq { color: #8c9aad; }
+
+    .ledger-state {
+      justify-self: end;
+      padding: 6px 8px;
+      border-radius: 6px;
+      color: #4f46e5;
+      background: #efefff;
+      font-size: 11px;
+    }
+
+    .ledger-row.approval {
+      border-left: 4px solid var(--amber);
+      background: #fffaf0;
+    }
+
+    .ledger-row.approval .ledger-state {
+      color: #8a5700;
+      background: #fff0c7;
+    }
+
+    .ledger-row.completed .ledger-state {
+      color: #087f70;
+      background: #daf6f2;
+    }
+
+    /* Direction C: nested control planes make trust boundaries visible. */
+    #control {
+      background:
+        linear-gradient(rgba(57, 172, 203, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(57, 172, 203, 0.08) 1px, transparent 1px),
+        radial-gradient(circle at 78% 45%, rgba(25, 143, 180, 0.2), transparent 36%),
+        #061522;
+      background-size: 24px 24px, 24px 24px, auto, auto;
+      color: #effcff;
+    }
+
+    #control .hero-copy {
+      width: 600px;
+    }
+
+    #control .eyebrow { color: #74a8b8; }
+
+    #control .eyebrow .status {
+      border: 1px solid rgba(45, 212, 215, 0.2);
+      background: rgba(45, 212, 215, 0.08);
+      color: #8aebed;
+    }
+
+    #control .wordmark { color: #effcff; }
+
+    #control .tagline { color: #8fb2c2; }
+
+    #control .tagline strong { color: #effcff; }
+
+    .plane-visual {
+      position: absolute;
+      top: 34px;
+      right: 54px;
+      width: 680px;
+      height: 352px;
+    }
+
+    .plane {
+      position: absolute;
+      border: 1px solid rgba(72, 205, 222, 0.45);
+      background: rgba(6, 29, 45, 0.5);
+    }
+
+    .plane::before {
+      position: absolute;
+      top: -10px;
+      left: 18px;
+      padding: 2px 8px;
+      background: #061522;
+      color: #61d9e5;
+      font: 600 11px/1.2 var(--font-mono);
+      letter-spacing: 0.12em;
+      content: attr(data-label);
+    }
+
+    .plane.outer {
+      inset: 0;
+      border-radius: 18px;
+    }
+
+    .plane.middle {
+      inset: 48px 42px 36px;
+      border-color: rgba(124, 108, 255, 0.58);
+      border-radius: 14px;
+    }
+
+    .plane.middle::before { color: #a99eff; }
+
+    .plane.inner {
+      inset: 96px 92px 78px;
+      border: 2px solid rgba(244, 185, 66, 0.72);
+      border-radius: 10px;
+      box-shadow: inset 0 0 44px rgba(244, 185, 66, 0.06);
+    }
+
+    .plane.inner::before { color: #ffd47a; }
+
+    .plane-core {
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: 210px;
+      transform: translate(-50%, -43%);
+      color: #e9fbff;
+      text-align: center;
+      font: 700 16px/1.35 var(--font-mono);
+      letter-spacing: 0.08em;
+    }
+
+    .plane-core small {
+      display: block;
+      margin-top: 8px;
+      color: #79a8b8;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .plane-node {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      width: 104px;
+      height: 38px;
+      border: 1px solid rgba(72, 205, 222, 0.3);
+      border-radius: 7px;
+      background: #092235;
+      color: #8ad9e2;
+      font: 600 11px/1 var(--font-mono);
+    }
+
+    .plane-node.n1 { left: 24px; top: 48px; }
+    .plane-node.n2 { right: 24px; top: 48px; }
+    .plane-node.n3 { left: 24px; bottom: 32px; }
+    .plane-node.n4 { right: 24px; bottom: 32px; }
+
+    /* Square, top-down runtime architecture visual used by the README. */
+    #runtime {
+      width: 1200px;
+      height: 1200px;
+      background:
+        radial-gradient(circle at 18% 8%, rgba(45, 212, 215, 0.18), transparent 28%),
+        radial-gradient(circle at 84% 82%, rgba(124, 108, 255, 0.12), transparent 30%),
+        linear-gradient(rgba(71, 85, 105, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(71, 85, 105, 0.08) 1px, transparent 1px),
+        #edf4fa;
+      background-size: auto, auto, 32px 32px, 32px 32px, auto;
+      color: #17283d;
+    }
+
+    #runtime::after {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(124, 108, 255, 0.035) 50%, transparent 94%);
+      content: "";
+    }
+
+    .runtime-stage {
+      position: absolute;
+      z-index: 1;
+      top: 56px;
+      left: 56px;
+      right: 56px;
+      display: grid;
+      grid-template-rows: 160px 160px 180px 220px 200px;
+      gap: 24px;
+    }
+
+    .runtime-layer {
+      --accent: #0f9fb4;
+      position: relative;
+      min-width: 0;
+      border: 1px solid #b9cbe0;
+      border-left: 4px solid var(--accent);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 14px 34px rgba(34, 50, 75, 0.1);
+    }
+
+    .runtime-layer:not(:last-child)::after {
+      position: absolute;
+      z-index: 3;
+      bottom: -25px;
+      left: 50%;
+      width: 24px;
+      height: 24px;
+      transform: translateX(-50%);
+      border: 1px solid color-mix(in srgb, var(--accent) 65%, #aac0d6);
+      border-radius: 50%;
+      background: #f8fbff;
+      color: var(--accent);
+      content: "↓";
+      font: 700 15px/22px var(--font-mono);
+      text-align: center;
+    }
+
+    .runtime-layer.channel { --accent: #1686c9; }
+    .runtime-layer.server { --accent: #6657e8; }
+    .runtime-layer.agent { --accent: #8b5cf6; }
+    .runtime-layer.infrastructure { --accent: #d28b13; }
+
+    .runtime-nodes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-content: center;
+      gap: 12px;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      padding: 22px 28px;
+    }
+
+    .runtime-layer.server .runtime-nodes {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .runtime-node {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 62px;
+      padding: 12px 10px;
+      border: 1px solid #b7cbe0;
+      border-radius: 10px;
+      background: #f8fbff;
+      box-shadow: 0 3px 10px rgba(42, 63, 90, 0.06);
+      color: #1a2b40;
+      text-align: center;
+      font: 650 12px/1.45 var(--font-mono);
+    }
+
+    .runtime-node.wide {
+      grid-column: span 2;
+    }
+
+    .runtime-footnote {
+      position: absolute;
+      z-index: 2;
+      right: 56px;
+      bottom: 31px;
+      color: #5b6f86;
+      font: 600 10px/1 var(--font-mono);
+      letter-spacing: 0.08em;
+    }
+  </style>
+</head>
+<body>
+  <section id="resumable" class="artboard hero" role="img" aria-label="Resumable Orbit banner direction">
+    <div class="hero-copy">
+      <div class="eyebrow">
+        <span class="status">DESIGN BASELINE</span>
+        <span>AGENT RUNTIME PLATFORM</span>
+      </div>
+      <h1 class="wordmark">ZHIYI</h1>
+      <p class="tagline">Reliable agent execution,<br><strong>beyond the demo.</strong></p>
+      <div class="verb-row"><span>RECOVER</span><span>GOVERN</span><span>APPROVE</span><span>OBSERVE</span></div>
+    </div>
+    <svg class="orbit-visual" viewBox="0 0 660 380" aria-hidden="true">
+      <defs>
+        <linearGradient id="orbit-gradient" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#2dd4d7"/>
+          <stop offset="0.55" stop-color="#7c6cff"/>
+          <stop offset="1" stop-color="#f4b942"/>
+        </linearGradient>
+        <filter id="soft-glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <path d="M112 188 C112 72 245 36 350 81 C416 109 443 158 515 169" fill="none" stroke="#243851" stroke-width="2"/>
+      <path d="M514 169 C568 179 588 216 558 259 C519 314 417 324 345 285" fill="none" stroke="url(#orbit-gradient)" stroke-width="3" stroke-linecap="round" filter="url(#soft-glow)"/>
+      <path d="M345 285 C278 251 241 204 178 201" fill="none" stroke="url(#orbit-gradient)" stroke-width="3" stroke-linecap="round"/>
+      <path d="M178 201 C138 200 112 199 112 188" fill="none" stroke="#2dd4d7" stroke-width="3" stroke-linecap="round"/>
+      <path d="M515 169 L532 160 M515 169 L528 182" fill="none" stroke="#f4b942" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="112" cy="188" r="12" fill="#0a1929" stroke="#2dd4d7" stroke-width="3"/>
+      <circle cx="250" cy="67" r="11" fill="#0a1929" stroke="#7c6cff" stroke-width="3"/>
+      <circle cx="439" cy="122" r="11" fill="#0a1929" stroke="#7c6cff" stroke-width="3"/>
+      <circle cx="516" cy="169" r="15" fill="#1b1a24" stroke="#f4b942" stroke-width="3"/>
+      <circle cx="466" cy="302" r="11" fill="#0a1929" stroke="#7c6cff" stroke-width="3"/>
+      <circle cx="267" cy="244" r="11" fill="#0a1929" stroke="#2dd4d7" stroke-width="3"/>
+      <rect x="486" y="150" width="60" height="38" rx="19" fill="none" stroke="#f4b942" stroke-opacity="0.15"/>
+      <text x="86" y="224" fill="#87a3b8" font-size="11" letter-spacing="1.4">RUN</text>
+      <text x="202" y="40" fill="#87a3b8" font-size="11" letter-spacing="1.4">CHECKPOINT</text>
+      <text x="402" y="91" fill="#87a3b8" font-size="11" letter-spacing="1.4">POLICY</text>
+      <text x="479" y="130" fill="#f4c56c" font-size="11" letter-spacing="1.4">APPROVAL</text>
+      <text x="440" y="340" fill="#87a3b8" font-size="11" letter-spacing="1.4">RESUME</text>
+      <text x="220" y="282" fill="#87a3b8" font-size="11" letter-spacing="1.4">EVENTS</text>
+      <g transform="translate(492 162)"><path d="M0 7h10M5 2v10" stroke="#f4b942" stroke-width="2" stroke-linecap="round"/></g>
+    </svg>
+  </section>
+
+  <section id="resumable-mobile" class="artboard hero-mobile" role="img" aria-label="Resumable Orbit mobile banner">
+    <div class="mobile-copy">
+      <div class="eyebrow">
+        <span class="status">DESIGN BASELINE</span>
+        <span>AGENT RUNTIME</span>
+      </div>
+      <h1 class="wordmark">ZHIYI</h1>
+      <p class="tagline">Reliable agent execution,<br><strong>beyond the demo.</strong></p>
+      <div class="verb-row"><span>RECOVER</span><span>GOVERN</span><span>APPROVE</span></div>
+    </div>
+    <svg class="mobile-orbit" viewBox="0 0 330 232" aria-hidden="true">
+      <defs>
+        <linearGradient id="mobile-orbit-gradient" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#2dd4d7"/>
+          <stop offset="0.58" stop-color="#7c6cff"/>
+          <stop offset="1" stop-color="#f4b942"/>
+        </linearGradient>
+      </defs>
+      <path d="M32 125 C58 54 154 37 220 72 C277 102 291 156 243 190 C195 224 104 204 80 158" fill="none" stroke="url(#mobile-orbit-gradient)" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="32" cy="125" r="9" fill="#081626" stroke="#2dd4d7" stroke-width="3"/>
+      <circle cx="154" cy="48" r="8" fill="#081626" stroke="#7c6cff" stroke-width="3"/>
+      <circle cx="253" cy="89" r="11" fill="#171824" stroke="#f4b942" stroke-width="3"/>
+      <circle cx="243" cy="190" r="8" fill="#081626" stroke="#7c6cff" stroke-width="3"/>
+      <circle cx="80" cy="158" r="8" fill="#081626" stroke="#2dd4d7" stroke-width="3"/>
+    </svg>
+  </section>
+
+  <section id="ledger" class="artboard hero" role="img" aria-label="Execution Ledger banner direction">
+    <div class="hero-copy">
+      <div class="eyebrow">
+        <span class="status">DESIGN BASELINE</span>
+        <span>AGENT RUNTIME PLATFORM</span>
+      </div>
+      <h1 class="wordmark">ZHIYI</h1>
+      <p class="tagline">Every run has a state.<br><strong>Every effect has a record.</strong></p>
+      <div class="verb-row"><span>RECOVER</span><span>GOVERN</span><span>APPROVE</span><span>OBSERVE</span></div>
+    </div>
+    <div class="ledger-panel" aria-hidden="true">
+      <div class="ledger-head"><span>SEQUENCE</span><span>EVENT</span><span>STATE</span></div>
+      <div class="ledger-row"><span class="ledger-seq">000127</span><span>run.checkpointed</span><span class="ledger-state">STORED</span></div>
+      <div class="ledger-row approval"><span class="ledger-seq">000128</span><span>approval.required</span><span class="ledger-state">WAITING</span></div>
+      <div class="ledger-row"><span class="ledger-seq">000129</span><span>run.resumed</span><span class="ledger-state">ACTIVE</span></div>
+      <div class="ledger-row completed"><span class="ledger-seq">000130</span><span>tool.completed</span><span class="ledger-state">VERIFIED</span></div>
+      <div class="ledger-row completed"><span class="ledger-seq">000131</span><span>run.succeeded</span><span class="ledger-state">FINAL</span></div>
+    </div>
+  </section>
+
+  <section id="control" class="artboard hero" role="img" aria-label="Control Plane banner direction">
+    <div class="hero-copy">
+      <div class="eyebrow">
+        <span class="status">DESIGN BASELINE</span>
+        <span>AGENT RUNTIME PLATFORM</span>
+      </div>
+      <h1 class="wordmark">ZHIYI</h1>
+      <p class="tagline">Execution inside boundaries.<br><strong>Control without lock-in.</strong></p>
+      <div class="verb-row"><span>RECOVER</span><span>GOVERN</span><span>APPROVE</span><span>OBSERVE</span></div>
+    </div>
+    <div class="plane-visual" aria-hidden="true">
+      <div class="plane outer" data-label="TENANT BOUNDARY"></div>
+      <div class="plane middle" data-label="POLICY &amp; APPROVAL"></div>
+      <div class="plane inner" data-label="RUNTIME CORE"></div>
+      <div class="plane-core">LANGGRAPH EXECUTION<small>CHECKPOINT · RESUME · EVENTS</small></div>
+      <div class="plane-node n1">MODEL</div>
+      <div class="plane-node n2">CONTEXT</div>
+      <div class="plane-node n3">TOOLS</div>
+      <div class="plane-node n4">MEMORY</div>
+    </div>
+  </section>
+
+  <section id="runtime" class="artboard" role="img" aria-label="ZHIYI 架构分层：客户端、渠道、服务端、Agent 核心和基础设施层自上而下排列">
+    <div class="runtime-stage" aria-hidden="true">
+      <div class="runtime-layer client">
+        <div class="runtime-nodes">
+          <div class="runtime-node">Python SDK</div>
+          <div class="runtime-node">Developer Console</div>
+          <div class="runtime-node">Business Application</div>
+        </div>
+      </div>
+      <div class="runtime-layer channel">
+        <div class="runtime-nodes">
+          <div class="runtime-node">REST Commands</div>
+          <div class="runtime-node">SSE Event Stream</div>
+          <div class="runtime-node">API Key / OIDC</div>
+        </div>
+      </div>
+      <div class="runtime-layer server">
+        <div class="runtime-nodes">
+          <div class="runtime-node">Runtime API</div>
+          <div class="runtime-node">Run Scheduler</div>
+          <div class="runtime-node">Runtime Worker</div>
+          <div class="runtime-node">Event Projector</div>
+        </div>
+      </div>
+      <div class="runtime-layer agent">
+        <div class="runtime-nodes">
+          <div class="runtime-node">AgentSpec / AgentVersion</div>
+          <div class="runtime-node">LangGraph Runtime</div>
+          <div class="runtime-node">Context / Memory / RAG</div>
+          <div class="runtime-node">Model Gateway</div>
+          <div class="runtime-node wide">Tool Registry / Policy / Approval</div>
+        </div>
+      </div>
+      <div class="runtime-layer infrastructure">
+        <div class="runtime-nodes">
+          <div class="runtime-node">PostgreSQL + pgvector</div>
+          <div class="runtime-node">LangGraph Checkpoint</div>
+          <div class="runtime-node">S3 Artifact Storage</div>
+          <div class="runtime-node">OpenTelemetry / Langfuse</div>
+          <div class="runtime-node wide">Model Providers / MCP Servers</div>
+        </div>
+      </div>
+    </div>
+    <div class="runtime-footnote">LOGICAL LAYERS · MODULAR MONOLITH · API AND WORKER SCALE INDEPENDENTLY</div>
+  </section>
+
+  <script>
+    const variant = new URLSearchParams(window.location.search).get("variant") || "resumable";
+    const dimensions = variant === "runtime"
+      ? [1200, 1200]
+      : variant === "resumable-mobile"
+        ? [720, 360]
+        : [1440, 420];
+    document.body.dataset.variant = variant;
+    document.documentElement.style.width = `${dimensions[0]}px`;
+    document.documentElement.style.height = `${dimensions[1]}px`;
+    document.body.style.width = `${dimensions[0]}px`;
+    document.body.style.height = `${dimensions[1]}px`;
+  </script>
+</body>
+</html>

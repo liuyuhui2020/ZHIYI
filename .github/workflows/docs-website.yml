@@ -1,0 +1,57 @@
+name: Documentation Website
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-website-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Build, browser, and quality gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: apps/docs/pnpm-lock.yaml
+
+      - name: Enable pinned pnpm
+        run: |
+          corepack enable
+          corepack install --global pnpm@11.22.0
+          pnpm --version
+
+      - name: Install locked dependencies
+        run: pnpm --dir apps/docs install --frozen-lockfile
+
+      - name: Install Chromium
+        run: pnpm --dir apps/docs exec playwright install --with-deps chromium
+
+      - name: Check content pipeline and Astro types
+        run: pnpm --dir apps/docs check
+
+      - name: Build and validate static output
+        run: pnpm --dir apps/docs build
+
+      - name: Run browser and accessibility acceptance
+        run: pnpm --dir apps/docs test:e2e
+
+      - name: Enforce Lighthouse thresholds
+        run: pnpm --dir apps/docs quality

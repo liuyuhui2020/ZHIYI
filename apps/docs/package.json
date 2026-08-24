@@ -1,0 +1,35 @@
+{
+  "name": "@zhiyi/docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.22.0",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "pnpm run build:site && pnpm run test:links",
+    "build:site": "astro check && astro build",
+    "preview": "astro preview --host 127.0.0.1 --port 4321",
+    "check": "astro check && pnpm run test:unit",
+    "test": "pnpm run test:unit",
+    "test:unit": "node --test tests/unit/*.test.mjs",
+    "test:links": "node scripts/validate-built-links.mjs",
+    "test:e2e": "playwright test",
+    "quality": "lhci autorun --config=lighthouserc.json"
+  },
+  "dependencies": {
+    "@astrojs/markdown-satteri": "0.3.7",
+    "@astrojs/starlight": "0.41.7",
+    "astro": "7.2.4",
+    "mermaid": "11.17.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@axe-core/playwright": "4.13.0",
+    "@lhci/cli": "0.15.1",
+    "@playwright/test": "1.62.1",
+    "typescript": "6.0.3"
+  }
+}
