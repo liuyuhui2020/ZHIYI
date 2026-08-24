@@ -149,6 +149,14 @@ and 1920 pixels with keyboard-only input, both themes, reduced motion, and no JS
 
 - [x] T042 [US1] Replace the T038 logo-only header with a smaller logo, target-stack badges, documentation links, and section navigation at the top of `README.md`, and record verification evidence in `specs/002-docs-website/drift-report.md`
 
+## Phase 13: Documentation CI Bootstrap Repair
+
+**Goal**: Keep the non-deploying documentation workflow reproducible on a clean GitHub-hosted runner where pnpm is unavailable before the pinned Corepack bootstrap step.
+
+**Independent Test**: A `push` workflow run reaches dependency installation with Node 24 and pinned pnpm 11.22.0, then completes the existing check, build, browser, accessibility, and Lighthouse gates.
+
+- [x] T043 Reproduce the clean-runner pnpm lookup failure from GitHub Actions run `32716751957`, remove the premature pnpm cache lookup from `.github/workflows/docs-website.yml`, rerun the local documentation and governance gates, and record the repair evidence in `specs/002-docs-website/drift-report.md`
+
 ## Dependencies and Execution Order
 
 - Phase 1 establishes the toolchain and blocks all later phases.
@@ -170,7 +178,7 @@ and 1920 pixels with keyboard-only input, both themes, reduced motion, and no JS
 | FR-011, FR-012; SC-007, SC-008, SC-009 | T005-T010, T019, T022, T034-T036 |
 | FR-013 | T011, T015, T019-T020 |
 | FR-014, FR-015 | T006, T009, T020 |
-| FR-016, FR-018 | T001-T003, T011, T015, T030 |
+| FR-016, FR-018 | T001-T003, T011, T015, T030, T043 |
 | FR-017; SC-010 | T001-T004, T028-T032 |
 
 ## Completion Definition

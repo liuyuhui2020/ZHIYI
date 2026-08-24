@@ -2,15 +2,15 @@
 
 **Feature**: 002-docs-website
 **Status**: ALIGNED
-**Docs-Impact**: UPDATED
-**Docs-Updated**: README.md, doc/PROJECT.md
-**Docs-Impact-Reason**: 官网新增独立静态工程、本地构建入口、单一事实源发布边界和质量门禁；README 与 PROJECT 已同步当前完成状态，README 顶部使用紧凑的主题自适应品牌标志、目标技术栈和导航，并继续明确 Runtime 未实现且网站未部署。
+**Docs-Impact**: NONE
+**Docs-Updated**: N/A
+**Docs-Impact-Reason**: T043 只修正文档站点 CI 中 pnpm 的启动顺序，不改变产品行为、站点内容、本地命令或对外文档；既有 README 与 PROJECT 描述继续有效。
 **Reviewed-By**: AI
 
 ## Alignment Evidence
 
 - Requirements and success criteria checked: all 18 functional requirements,
-  10 success criteria, and 15 acceptance scenarios are covered by the 42 tasks
+  10 success criteria, and 15 acceptance scenarios are covered by the 43 tasks
   and their tests or explicit verification steps.
 - Plan sections checked: static architecture, single-source loader, local
   Pagefind, Chinese locale boundary, responsive/accessibility behavior,
@@ -54,8 +54,9 @@
   unimplemented Product Runtime remain explicit in the header.
 - Convergence result: all 18 FRs, 10 SCs, 15 acceptance scenarios, plan
   decisions, and eight constitution principles were checked; no missing,
-  partial, contradictory, or unrequested work was found, so no convergence
-  task was appended.
+  partial, contradictory, or unrequested product work was found. The T043
+  CI-bootstrap re-check confirms the workflow repair is fully traced and does
+  not require another convergence task.
 - Static and content evidence: Astro reports 0 errors, 0 warnings, and 0 hints;
   17 content-pipeline unit tests pass; the production build generates 9 pages;
   the validator passes all 8 required routes, internal targets, anchors,
@@ -73,10 +74,15 @@
   completed in 6.8 seconds; dependency preparation, production build, browser
   suite, and quality workflow completed within the 10-minute target. The CI
   workflow is non-deploying and uses Node 24.
+- CI bootstrap repair: GitHub Actions run `32716751957` reproduced a clean-runner
+  failure in `actions/setup-node` because its pnpm cache lookup ran before the
+  workflow's pinned Corepack bootstrap. T043 removes only that premature cache
+  lookup; dependency installation remains frozen and pinned to pnpm 11.22.0,
+  and all existing documentation quality gates remain unchanged.
 - Governance evidence: all 29 SDD checker unit tests pass; the final manual
-  worktree drift gate passes. T037 through T042 change only governed documentation
-  and visual assets, so the checker reports zero product implementation files
-  for this incremental work.
+  worktree drift gate passes. T037 through T042 reported zero product
+  implementation files; the T043 re-check reports the single governed CI
+  workflow file under feature `002-docs-website`.
 - 30-second first-visit comprehension check (2026-08-21): PASS. In a
   first-viewport, read-only review, the reviewer identified the positioning as
   a reliable production-oriented Agent Runtime design baseline; the maturity
