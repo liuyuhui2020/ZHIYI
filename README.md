@@ -12,7 +12,7 @@
   </h1>
   <p>
     <strong>Self-hosted Agent Runtime Platform for recoverable, governed execution</strong><br>
-    <sub>Design baseline · Model Gateway slice implemented · Product Runtime incomplete</sub>
+    <sub>Design baseline · Two M0 foundation slices implemented · Product Runtime incomplete</sub>
   </p>
   <p>
     <a href="./doc/PROJECT.md"><strong>Roadmap</strong></a> ·
@@ -21,7 +21,7 @@
     <a href="./doc/SDD开发规范.md"><strong>Development Guide</strong></a>
   </p>
   <p>
-    <img alt="Project stage: first M0 slice" src="https://img.shields.io/badge/stage-first%20M0%20slice-f59e0b?style=flat-square">
+    <img alt="Project stage: two M0 foundation slices" src="https://img.shields.io/badge/stage-two%20M0%20foundation%20slices-f59e0b?style=flat-square">
     <img alt="Python target: 3.12" src="https://img.shields.io/badge/Python-target%203.12-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white">
     <img alt="FastAPI target" src="https://img.shields.io/badge/FastAPI-target-009688?style=flat-square&amp;logo=fastapi&amp;logoColor=white">
     <img alt="LangChain target" src="https://img.shields.io/badge/LangChain-target-1C3C3C?style=flat-square">
@@ -49,11 +49,12 @@
 ## Overview
 
 > [!IMPORTANT]
-> ZHIYI is currently in the **design baseline with its first approved M0 code slice**.
+> ZHIYI is currently in the **design baseline with two approved M0 foundation slices**.
 > The repository includes the product design, Spec Kit SDD workflow, design-drift
-> checks, Git hooks, CI, and an implemented provider-neutral Model Gateway. The
-> recoverable Run Runtime, API, SDK, worker, persistence, and console remain
-> unimplemented; the Model Gateway alone is not a usable Agent Runtime.
+> checks, Git hooks, CI, an implemented provider-neutral Model Gateway, and a
+> framework-free Run Lifecycle Kernel with an in-memory repository. PostgreSQL
+> persistence, leases, recoverable workers, API, SDK, checkpointing, and console
+> remain unimplemented; these foundations are not yet a usable Agent Runtime.
 
 ZHIYI is a self-hosted agent runtime platform for agent developers and platform
 teams. It goes beyond demonstration-level tool calling by providing a stable
@@ -66,7 +67,8 @@ effects and require recovery and auditing.
 | Spec Kit, design-drift checks, Git/Claude hooks, and CI | Established |
 | Official website and documentation portal | Local static build complete; not deployed |
 | Model Gateway, Fake/OpenAI/Anthropic adapters, Tool/Structured Output, retry/Fallback | Implemented and offline-tested |
-| Runtime, REST/SSE, worker, and checkpointing | Planned for M0 |
+| Run lifecycle state machine, hard budget, command idempotency, safe events/results, in-memory repository | Implemented and offline-tested |
+| PostgreSQL persistence, leases, REST/SSE, worker, and checkpointing | Planned for M0 |
 | Context, memory, RAG, tool approvals, and Langfuse | Planned for M1 |
 | MCP, subagents, OIDC/RBAC, Helm, and production gates | Planned for M2 |
 
@@ -217,9 +219,10 @@ implementation.
 
 ## Contributing to Design and Development
 
-The Model Gateway is the first approved product-code slice. Every additional
-Runtime capability still requires its own Spec Kit artifacts, drift analysis,
-tests, and explicit implementation approval.
+The Model Gateway and Run Lifecycle Kernel are the first two approved
+product-code foundation slices. Every additional Runtime capability still
+requires its own Spec Kit artifacts, drift analysis, tests, and explicit
+implementation approval.
 
 After cloning, install the versioned Git hooks and the frozen Python environment:
 
