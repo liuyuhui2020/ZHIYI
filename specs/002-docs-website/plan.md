@@ -151,6 +151,10 @@ released product.
   completion.
 - Lighthouse uses multiple samples and median assertions to reduce false
   failures while keeping all four categories at 90 or higher.
+- The clean-runner CI sequence sets up Node 24 without a pnpm cache lookup,
+  enables the repository-pinned pnpm version through Corepack, and only then
+  performs the frozen install and documentation quality commands. This avoids
+  assuming pnpm exists before the workflow bootstraps it.
 - A Starlight 0.x upgrade is a separate dependency change with full regression
   checks; versions are exact in `package.json` and `pnpm-lock.yaml`.
 - Rollback deletes `apps/docs/` and `.github/workflows/docs-website.yml` and

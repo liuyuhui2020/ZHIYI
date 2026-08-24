@@ -10,7 +10,7 @@
 ## Alignment Evidence
 
 - Requirements and success criteria checked: all 18 functional requirements,
-  10 success criteria, and 15 acceptance scenarios are covered by the 43 tasks
+  10 success criteria, and 16 acceptance scenarios are covered by the 43 tasks
   and their tests or explicit verification steps.
 - Plan sections checked: static architecture, single-source loader, local
   Pagefind, Chinese locale boundary, responsive/accessibility behavior,
@@ -52,7 +52,7 @@
   badge/navigation wrapping, and no horizontal overflow. Planned technologies
   are consistently labeled `target`, while the design-baseline state and the
   unimplemented Product Runtime remain explicit in the header.
-- Convergence result: all 18 FRs, 10 SCs, 15 acceptance scenarios, plan
+- Convergence result: all 18 FRs, 10 SCs, 16 acceptance scenarios, plan
   decisions, and eight constitution principles were checked; no missing,
   partial, contradictory, or unrequested product work was found. The T043
   CI-bootstrap re-check confirms the workflow repair is fully traced and does
@@ -74,11 +74,12 @@
   completed in 6.8 seconds; dependency preparation, production build, browser
   suite, and quality workflow completed within the 10-minute target. The CI
   workflow is non-deploying and uses Node 24.
-- CI bootstrap repair: GitHub Actions run `32716751957` reproduced a clean-runner
-  failure in `actions/setup-node` because its pnpm cache lookup ran before the
-  workflow's pinned Corepack bootstrap. T043 removes only that premature cache
-  lookup; dependency installation remains frozen and pinned to pnpm 11.22.0,
-  and all existing documentation quality gates remain unchanged.
+- CI bootstrap repair: the failed post-merge Documentation Website run
+  reproduced a clean-runner failure in `actions/setup-node` because its pnpm
+  cache lookup ran before the workflow's pinned Corepack bootstrap. T043
+  removes only that premature cache lookup; dependency installation remains
+  frozen and pinned to pnpm 11.22.0, and all existing documentation quality
+  gates remain unchanged.
 - Governance evidence: all 29 SDD checker unit tests pass; the final manual
   worktree drift gate passes. T037 through T042 reported zero product
   implementation files; the T043 re-check reports the single governed CI
