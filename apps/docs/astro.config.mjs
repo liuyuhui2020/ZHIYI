@@ -3,7 +3,7 @@ import { satteri } from '@astrojs/markdown-satteri';
 import starlight from '@astrojs/starlight';
 import { fileURLToPath } from 'node:url';
 
-import { createSidebar } from './src/lib/document-manifest.mjs';
+import { createSidebar, REPOSITORY_URL } from './src/lib/document-manifest.mjs';
 import { createMermaidSatteriPlugin } from './src/lib/mermaid-plugin.mjs';
 import { repositoryLinksSatteri } from './src/lib/repository-links.mjs';
 
@@ -59,7 +59,7 @@ export default defineConfig({
         {
           icon: 'github',
           label: 'ZHIYI GitHub 仓库',
-          href: 'https://github.com/liuyuhui2020/ZHIYI',
+          href: REPOSITORY_URL,
         },
       ],
       customCss: ['./src/styles/global.css'],

@@ -1,3 +1,7 @@
+---
+import { REPOSITORY_URL } from '../lib/document-manifest.mjs';
+---
+
 <footer class="site-footer">
   <div class="site-shell site-footer__inner">
     <div>
@@ -7,7 +11,7 @@
     <nav aria-label="页脚导航">
       <a href="/docs/product-value/">文档</a>
       <a href="/docs/development/sdd/">SDD 规范</a>
-      <a href="https://github.com/liuyuhui2020/ZHIYI">GitHub</a>
+      <a href={REPOSITORY_URL}>GitHub</a>
     </nav>
     <p class="site-footer__note">当前为方案阶段 · 未部署产品 Runtime</p>
   </div>

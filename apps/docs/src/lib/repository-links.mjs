@@ -54,28 +54,6 @@ export function resolveRepositoryLink({
   return `${REPOSITORY_URL}/${kind}/main/${encodedTarget}${suffix}`;
 }
 
-export function repositoryLinksRemark(options = {}) {
-  const repositoryRoot = options.repositoryRoot ?? DEFAULT_REPOSITORY_ROOT;
-  const documents = options.documents ?? DOCUMENTS;
-
-  return (tree, file) => {
-    if (!file.path) {
-      throw new Error('Repository link processing requires a source file path.');
-    }
-
-    walk(tree, (node) => {
-      if ((node.type === 'link' || node.type === 'definition') && typeof node.url === 'string') {
-        node.url = resolveRepositoryLink({
-          url: node.url,
-          sourcePath: file.path,
-          repositoryRoot,
-          documents,
-        });
-      }
-    });
-  };
-}
-
 export function repositoryLinksSatteri(options = {}) {
   const repositoryRoot = options.repositoryRoot ?? DEFAULT_REPOSITORY_ROOT;
   const documents = options.documents ?? DOCUMENTS;
@@ -126,13 +104,5 @@ function assertSourceInsideRoot(repositoryRoot, sourcePath) {
   const relativeSource = relative(resolve(repositoryRoot), resolve(sourcePath));
   if (relativeSource === '..' || relativeSource.startsWith(`..${sep}`) || isAbsolute(relativeSource)) {
     throw new Error('outside');
-  }
-}
-
-function walk(node, visit) {
-  if (!node || typeof node !== 'object') return;
-  visit(node);
-  if (Array.isArray(node.children)) {
-    for (const child of node.children) walk(child, visit);
   }
 }

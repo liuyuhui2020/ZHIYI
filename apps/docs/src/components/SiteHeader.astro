@@ -1,5 +1,6 @@
 ---
 import BrandMark from './BrandMark.astro';
+import { REPOSITORY_URL } from '../lib/document-manifest.mjs';
 
 const links = [
   { label: '产品价值', href: '/docs/product-value/' },
@@ -18,7 +19,7 @@ const links = [
 
     <nav class="desktop-nav" aria-label="主导航">
       {links.map((link) => <a href={link.href}>{link.label}</a>)}
-      <a class="nav-github" href="https://github.com/liuyuhui2020/ZHIYI">GitHub <span aria-hidden="true">↗</span></a>
+      <a class="nav-github" href={REPOSITORY_URL}>GitHub <span aria-hidden="true">↗</span></a>
     </nav>
 
     <div class="header-controls">
@@ -30,7 +31,7 @@ const links = [
         <summary aria-label="打开主导航"><span aria-hidden="true">菜单</span></summary>
         <nav aria-label="主导航">
           {links.map((link) => <a href={link.href}>{link.label}</a>)}
-          <a href="https://github.com/liuyuhui2020/ZHIYI">GitHub ↗</a>
+          <a href={REPOSITORY_URL}>GitHub ↗</a>
         </nav>
       </details>
     </div>

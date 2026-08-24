@@ -1,6 +1,7 @@
 ---
 import SignalMap from '../components/SignalMap.astro';
 import SiteLayout from '../layouts/SiteLayout.astro';
+import { REPOSITORY_URL } from '../lib/document-manifest.mjs';
 
 const description = 'ZHIYI 是面向生产级 AI Agent 的 Runtime 设计基线，聚焦可恢复执行、上下文治理、安全工具调用、Memory 与全链路可观测。';
 ---
@@ -138,7 +139,7 @@ const description = 'ZHIYI 是面向生产级 AI Agent 的 Runtime 设计基线�
     <p>先理解价值与范围，再进入功能、架构和开发治理。网站不维护第二份正文副本。</p>
     <div class="docs-cta__actions">
       <a class="button button--primary" href="/docs/product-value/">进入文档 <span aria-hidden="true">→</span></a>
-      <a class="button button--quiet" href="https://github.com/liuyuhui2020/ZHIYI">查看 GitHub</a>
+      <a class="button button--quiet" href={REPOSITORY_URL}>查看 GitHub</a>
     </div>
   </section>
 </SiteLayout>
