@@ -1,9 +1,9 @@
 # ZHIYI Agent Runtime Platform 项目说明
 
-> 当前阶段：方案基线与工程治理
-> 项目状态：产品编码未开始；SDD 治理与本地官网构建已建立，官网尚未部署
+> 当前阶段：方案基线与首个 M0 实现切片
+> 项目状态：Model Gateway 已实现并通过离线门禁；完整 Runtime 尚未实现，官网尚未部署
 > 文档版本：v0.1
-> 更新日期：2026-08-21
+> 更新日期：2026-08-24
 
 ## 1. 项目章程
 
@@ -36,13 +36,16 @@ ZHIYI 是一个面向开发者、自托管、基于 LangChain 生态的 Agent Ru
 - 初始化官方 Spec Kit，并安装 Codex 和 Claude Code 集成。
 - 建立项目宪法、设计漂移检查器、Git/Claude Hooks 和 CI 门禁。
 - 建立 `apps/docs/` 静态官网与文档门户、Pagefind 搜索、响应式与质量门禁。
+- 建立 Python 3.12 工程、冻结依赖、非部署 CI 和 Model Gateway 平台契约。
+- 完成 Fake、OpenAI、Anthropic Provider，文本/流式、Tool Calling、Structured
+  Output、保守 Token 预检、用量、总超时、有限重试、限流、熔断和兼容 Fallback。
+- 完成密钥引用边界、离线契约/并发/性能测试；真实 Provider 冒烟测试默认跳过且必须显式授权。
 
 ### 未开始
 
-- 产品 Runtime 工程脚手架和依赖锁定。
 - 数据库 Schema 与迁移。
-- Runtime、API、Worker 和 Console 实现。
-- 测试、压测、安全审计和部署。
+- Agent/Run Runtime、API、Worker、Checkpoint、SDK 和 Console 实现。
+- Runtime 级恢复测试、容量压测、安全审计和部署。
 
 ### 历史规划草案
 
@@ -103,7 +106,7 @@ ZHIYI 是一个面向开发者、自托管、基于 LangChain 生态的 Agent Ru
 - 领域对象和平台端口。
 - AgentSpec、AgentVersion 和标准 Graph。
 - 异步 Run、PostgreSQL租约、Worker 和 Reconciler。
-- Fake Model、Model Gateway 和一个只读 Tool。
+- 已完成的 Fake Model 与 Model Gateway 集成，以及一个只读 Tool。
 - LangGraph PostgreSQL Checkpoint。
 - RunEvent、REST、SSE 和 RunResult。
 - 预算、取消、失败分类、日志和健康检查。
@@ -174,7 +177,7 @@ M1 只面向可信开发或试点环境，不开放通用外部生产流量。
 | Domain/API Contract | 核心对象与事件 | Memory/RAG/Approval | MCP/Subagent/RBAC |
 | Runtime | 标准 Graph 与恢复 | Planning/Context/Tool | 版本路由与复杂编排 |
 | Data | PostgreSQL/Checkpoint | pgvector/S3/留存 | HA/备份/容量 |
-| Model | Fake + Gateway | OpenAI/Anthropic | 更多 Provider 按需求 |
+| Model | Fake + Gateway（已完成独立切片） | Runtime 集成与评测 | 更多 Provider 按需求 |
 | UX | OpenAPI/SSE | 最小 Console | 生产运维体验 |
 | Quality | 单元/集成/恢复 | 评测/安全/故障注入 | 压测/审计/发布门禁 |
 | Delivery | Compose | 试点环境 | Helm/滚动升级/回滚 |
@@ -218,6 +221,7 @@ M1 只面向可信开发或试点环境，不开放通用外部生产流量。
 | D-033 | 生产 Agent 禁止自我修改 | 已确认 |
 | D-034 | RunResult 为稳定结构化契约 | 已确认 |
 | D-035 | 官网采用静态单一事实源发布，不在本 Feature 中部署 | 已确认 |
+| D-036 | Model Gateway 独占重试/Fallback，Provider SDK 禁用隐藏重试 | 已确认并实现 |
 
 ## 9. 风险登记
 
@@ -273,13 +277,10 @@ M1 只面向可信开发或试点环境，不开放通用外部生产流量。
 
 ### 11.3 进入下一阶段
 
-当前下一门禁不是编码，而是文档评审：
-
-1. 审阅 `doc/` 文档的一致性和范围。
-2. 解决待确认事项中与 M0 有关的项目名称和运行边界。
-3. 使用 Spec Kit 为 M0 建立 `spec → plan → tasks` 工件。
-4. 运行 `$speckit-analyze`，生成验收测试和漂移报告。
-5. 明确批准后再初始化产品工程。
+Model Gateway 不代表 M0 Runtime 完成。下一实现切片必须围绕 Agent/Run 领域、持久化
+边界或 Worker 恢复机制单独建立 Spec Kit Feature，完成 `spec → plan → tasks →
+analyze`、测试与漂移门禁，并再次获得明确批准；不得直接把 Provider 调用包装成
+无持久化、不可恢复的同步 Agent Loop。
 
 ## 12. 项目健康指标
 

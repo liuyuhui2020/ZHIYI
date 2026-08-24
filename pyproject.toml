@@ -1,0 +1,54 @@
+[build-system]
+requires = ["uv_build>=0.11.6,<0.12.0"]
+build-backend = "uv_build"
+
+[project]
+name = "zhiyi"
+version = "0.1.0"
+description = "Recoverable, governed agent runtime platform"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "langchain-anthropic==1.6.1",
+  "langchain-core==1.6.0",
+  "langchain-openai==1.6.0",
+  "pydantic==2.13.4",
+]
+
+[dependency-groups]
+dev = [
+  "mypy==2.3.1",
+  "pytest==9.1.1",
+  "pytest-asyncio==1.4.0",
+  "ruff==0.16.4",
+]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+  "online: opt-in test that calls a paid model provider",
+  "performance: deterministic local performance acceptance test",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["ASYNC", "B", "E", "F", "I", "RUF", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+pretty = true
+show_error_codes = true
+files = ["src", "tests"]
+
+[tool.uv]
+package = true
