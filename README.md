@@ -12,7 +12,7 @@
   </h1>
   <p>
     <strong>Self-hosted Agent Runtime Platform for recoverable, governed execution</strong><br>
-    <sub>Design baseline · Product Runtime implementation has not started</sub>
+    <sub>Design baseline · Model Gateway slice implemented · Product Runtime incomplete</sub>
   </p>
   <p>
     <a href="./doc/PROJECT.md"><strong>Roadmap</strong></a> ·
@@ -21,7 +21,7 @@
     <a href="./doc/SDD开发规范.md"><strong>Development Guide</strong></a>
   </p>
   <p>
-    <img alt="Project stage: design baseline" src="https://img.shields.io/badge/stage-design%20baseline-f59e0b?style=flat-square">
+    <img alt="Project stage: first M0 slice" src="https://img.shields.io/badge/stage-first%20M0%20slice-f59e0b?style=flat-square">
     <img alt="Python target: 3.12" src="https://img.shields.io/badge/Python-target%203.12-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white">
     <img alt="FastAPI target" src="https://img.shields.io/badge/FastAPI-target-009688?style=flat-square&amp;logo=fastapi&amp;logoColor=white">
     <img alt="LangChain target" src="https://img.shields.io/badge/LangChain-target-1C3C3C?style=flat-square">
@@ -49,11 +49,11 @@
 ## Overview
 
 > [!IMPORTANT]
-> ZHIYI is currently in the **design baseline and engineering governance phase**.
+> ZHIYI is currently in the **design baseline with its first approved M0 code slice**.
 > The repository includes the product design, Spec Kit SDD workflow, design-drift
-> checks, Git hooks, and CI. The product runtime, API, SDK, and console have not
-> entered implementation. This README describes approved design goals, not
-> currently available runtime capabilities.
+> checks, Git hooks, CI, and an implemented provider-neutral Model Gateway. The
+> recoverable Run Runtime, API, SDK, worker, persistence, and console remain
+> unimplemented; the Model Gateway alone is not a usable Agent Runtime.
 
 ZHIYI is a self-hosted agent runtime platform for agent developers and platform
 teams. It goes beyond demonstration-level tool calling by providing a stable
@@ -65,6 +65,7 @@ effects and require recovery and auditing.
 | Product value, requirements, functional design, and technical design | Baselined |
 | Spec Kit, design-drift checks, Git/Claude hooks, and CI | Established |
 | Official website and documentation portal | Local static build complete; not deployed |
+| Model Gateway, Fake/OpenAI/Anthropic adapters, Tool/Structured Output, retry/Fallback | Implemented and offline-tested |
 | Runtime, REST/SSE, worker, and checkpointing | Planned for M0 |
 | Context, memory, RAG, tool approvals, and Langfuse | Planned for M1 |
 | MCP, subagents, OIDC/RBAC, Helm, and production gates | Planned for M2 |
@@ -216,22 +217,29 @@ implementation.
 
 ## Contributing to Design and Development
 
-Contributions are currently welcome for product documentation, Spec Kit
-artifacts, architecture reviews, and governance tooling. The product runtime has
-not been approved for implementation; all product code must pass the design gates
-for its feature and receive explicit approval first.
+The Model Gateway is the first approved product-code slice. Every additional
+Runtime capability still requires its own Spec Kit artifacts, drift analysis,
+tests, and explicit implementation approval.
 
-The repository does not yet provide product installation or startup commands.
-After cloning the repository for documentation or governance work, install the
-versioned Git hooks:
+After cloning, install the versioned Git hooks and the frozen Python environment:
 
 ```bash
 git clone https://github.com/liuyuhui2020/ZHIYI.git
 cd ZHIYI
 ./scripts/sdd/install_hooks.sh
+uv sync --all-groups --frozen --python 3.12
 ```
 
-Before any product implementation begins:
+Run the local Python release gate without paid Provider calls:
+
+```bash
+uv run pytest -m "not online"
+uv run ruff check src tests
+uv run ruff format --check src tests
+uv run mypy
+```
+
+Before any additional product implementation begins:
 
 1. Read this README, [PROJECT.md](./doc/PROJECT.md), and the core product documents.
 2. Resolve the outstanding decisions for the relevant M0 scope.
