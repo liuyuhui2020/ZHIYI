@@ -14,7 +14,11 @@ if TYPE_CHECKING:
         CommandReceipt,
         CommitOutcome,
         RunRepository,
+        RunRepositoryError,
+        RunRepositoryErrorCode,
+        safe_repository_error_message,
     )
+    from zhiyi.application.ports.run_repository_validation import validate_commit_candidate
     from zhiyi.application.ports.secret_provider import (
         SecretProvider,
         SecretReference,
@@ -32,12 +36,16 @@ __all__ = [
     "ProviderChunk",
     "ProviderResponse",
     "RunRepository",
+    "RunRepositoryError",
+    "RunRepositoryErrorCode",
     "SecretProvider",
     "SecretReference",
     "SecretResolutionError",
     "SecretValue",
     "TokenEstimate",
     "TokenEstimator",
+    "safe_repository_error_message",
+    "validate_commit_candidate",
 ]
 
 
@@ -50,10 +58,21 @@ def __getattr__(name: str) -> object:
         from zhiyi.application.ports.identifier_generator import IdentifierGenerator
 
         return IdentifierGenerator
-    if name in {"CommandReceipt", "CommitOutcome", "RunRepository"}:
+    if name in {
+        "CommandReceipt",
+        "CommitOutcome",
+        "RunRepository",
+        "RunRepositoryError",
+        "RunRepositoryErrorCode",
+        "safe_repository_error_message",
+    }:
         from zhiyi.application.ports import run_repository
 
         return getattr(run_repository, name)
+    if name == "validate_commit_candidate":
+        from zhiyi.application.ports.run_repository_validation import validate_commit_candidate
+
+        return validate_commit_candidate
     if name in {"ModelProvider", "ProviderChunk", "ProviderResponse"}:
         from zhiyi.application.ports import model_provider
 

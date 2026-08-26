@@ -1,9 +1,9 @@
 # ZHIYI Agent Runtime Platform 项目说明
 
-> 当前阶段：方案基线与两个 M0 基础实现切片
-> 项目状态：Model Gateway 与 Run Lifecycle Kernel 已通过离线门禁；完整 Runtime 尚未实现，官网尚未部署
+> 当前阶段：方案基线与三个 M0 基础实现切片
+> 项目状态：Model Gateway、Run Lifecycle Kernel 与 PostgreSQL RunRepository 已通过对应门禁；完整 Runtime 尚未实现，官网尚未部署
 > 文档版本：v0.1
-> 更新日期：2026-08-24
+> 更新日期：2026-08-25
 
 ## 1. 项目章程
 
@@ -44,11 +44,13 @@ ZHIYI 是一个面向开发者、自托管、基于 LangChain 生态的 Agent Ru
   deadline、取消、不可变 RunResult、版本化安全事件和稳定错误分类。
 - 完成命令意图幂等、乐观并发、租户隔离、原子 Run/Event/Receipt 仓储端口与内存
   适配器，并通过 1,000 路并发单赢家和 10,000 次领域迁移性能门禁。
+- 完成 PostgreSQL 18.6 Run/Event/CommandReceipt 仓储、SQLAlchemy Core 异步适配器、
+  Alembic 显式迁移、结构兼容性门禁、跨进程命令回放、租户/全局事件隔离以及三类提交
+  故障窗口验证；应用启动不执行 DDL，Worker 与租约未进入本切片。
 
 ### 未开始
 
-- 数据库 Schema 与迁移。
-- PostgreSQL Run 仓储、租约、Worker、Checkpoint、API、SDK 和 Console 实现。
+- PostgreSQL 领取租约、Worker、Checkpoint、API、SDK 和 Console 实现。
 - Runtime 级恢复测试、容量压测、安全审计和部署。
 
 ### 历史规划草案
@@ -281,8 +283,8 @@ M1 只面向可信开发或试点环境，不开放通用外部生产流量。
 
 ### 11.3 进入下一阶段
 
-Model Gateway 与 Run Lifecycle Kernel 仍不代表 M0 Runtime 完成。下一实现切片应优先
-实现 PostgreSQL Run/Event/CommandReceipt 仓储、领取租约与 Worker 恢复边界，并通过
+Model Gateway、Run Lifecycle Kernel 与 PostgreSQL RunRepository 仍不代表 M0 Runtime
+完成。下一实现切片应优先建立领取租约与 Worker 恢复边界，并通过
 独立 Spec Kit Feature 完成 `spec → plan → tasks → analyze`、测试与漂移门禁；不得把
 内存适配器或 Provider 调用包装成无持久化、不可恢复的同步 Agent Loop。
 

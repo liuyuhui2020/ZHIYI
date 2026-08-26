@@ -11,6 +11,7 @@ from zhiyi.application.ports.run_repository import (
     CommitOutcome,
     RunRepository,
 )
+from zhiyi.application.ports.run_repository_validation import validate_commit_candidate
 from zhiyi.domain.runs.aggregate import Run
 from zhiyi.domain.runs.errors import RunErrorCode, RunLifecycleError
 from zhiyi.domain.runs.events import RunEvent
@@ -107,13 +108,13 @@ class MemoryRunRepository(RunRepository):
             if expected_version != current_version:
                 raise RunLifecycleError(RunErrorCode.VERSION_CONFLICT)
 
-            self._validate_commit(
+            validate_commit_candidate(
                 expected_version=expected_version,
                 current=current,
-                current_events=current_events,
                 updated_run=updated_run,
                 new_events=new_events,
                 receipt=receipt,
+                occupied_event_ids=self._event_ids,
             )
 
             next_runs = dict(self._runs)
@@ -132,51 +133,3 @@ class MemoryRunRepository(RunRepository):
             self._commands = next_commands
             self._event_ids = next_event_ids
             return outcome
-
-    def _validate_commit(
-        self,
-        *,
-        expected_version: int,
-        current: Run | None,
-        current_events: tuple[RunEvent, ...],
-        updated_run: Run,
-        new_events: tuple[RunEvent, ...],
-        receipt: CommandReceipt,
-    ) -> None:
-        invalid = RunLifecycleError(RunErrorCode.INVARIANT_VIOLATION)
-        if len(new_events) > 1:
-            raise invalid
-        if (
-            receipt.tenant_id != updated_run.tenant_id
-            or receipt.run_id != updated_run.run_id
-            or receipt.resulting_status is not updated_run.status
-            or receipt.resulting_version != updated_run.version
-            or receipt.event_ids != tuple(event.event_id for event in new_events)
-        ):
-            raise invalid
-        if expected_version == 0:
-            if current is not None or updated_run.version != 1 or len(new_events) != 1:
-                raise invalid
-        elif current is None:
-            raise invalid
-        if not new_events:
-            if current is None or updated_run != current:
-                raise invalid
-        elif updated_run.version != expected_version + len(new_events):
-            raise invalid
-
-        expected_sequence = len(current_events) + 1
-        seen_new_ids: set[EventId] = set()
-        for event in new_events:
-            if (
-                event.tenant_id != updated_run.tenant_id
-                or event.run_id != updated_run.run_id
-                or event.sequence != expected_sequence
-                or event.event_id in self._event_ids
-                or event.event_id in seen_new_ids
-            ):
-                raise invalid
-            seen_new_ids.add(event.event_id)
-            expected_sequence += 1
-        if updated_run.next_event_sequence != len(current_events) + len(new_events) + 1:
-            raise invalid

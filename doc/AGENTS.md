@@ -147,6 +147,20 @@ uv run ruff format --check .
 uv run mypy src tests
 ```
 
+涉及 PostgreSQL 的 Feature 还必须使用模块级 `postgresql` marker，并分别运行：
+
+```bash
+uv run pytest -m "not online and not postgresql"
+uv run alembic upgrade head
+uv run alembic current --check-heads
+uv run alembic check
+uv run pytest -m postgresql
+```
+
+应用进程不得调用 `create_all`、Alembic upgrade/stamp 或自动修复 Schema。迁移必须由独立
+发布步骤执行；`downgrade base` 等破坏性操作必须先校验数据库、用户、主机和一次性环境身份，
+不得用于含生产数据的原库回退。
+
 前两项治理命令已经生效；其余是产品工程建立后的目标契约，并应以仓库实际
 命令为准。前端需补类型检查、单元测试和生产构建。
 
