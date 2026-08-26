@@ -5,10 +5,11 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from enum import StrEnum
 from typing import TYPE_CHECKING, Protocol
 
 from zhiyi.domain.runs.events import RunEvent, RunStatus
-from zhiyi.domain.runs.identifiers import CommandId, EventId, RunId, TenantId
+from zhiyi.domain.runs.identifiers import CommandId, CorrelationId, EventId, RunId, TenantId
 
 if TYPE_CHECKING:
     from zhiyi.domain.runs.aggregate import Run
@@ -28,6 +29,59 @@ _COMMAND_TYPES = frozenset(
     }
 )
 _FINGERPRINT_PATTERN = re.compile(r"sha256:[0-9a-f]{64}\Z")
+
+
+class RunRepositoryErrorCode(StrEnum):
+    STORAGE_UNAVAILABLE = "storage_unavailable"
+    COMMIT_OUTCOME_UNKNOWN = "commit_outcome_unknown"
+    DATA_CORRUPTION = "data_corruption"
+    SCHEMA_INCOMPATIBLE = "schema_incompatible"
+
+
+_SAFE_REPOSITORY_MESSAGES: dict[RunRepositoryErrorCode, str] = {
+    RunRepositoryErrorCode.STORAGE_UNAVAILABLE: "Run storage is unavailable",
+    RunRepositoryErrorCode.COMMIT_OUTCOME_UNKNOWN: "Run storage commit outcome is unknown",
+    RunRepositoryErrorCode.DATA_CORRUPTION: "Run storage data is invalid",
+    RunRepositoryErrorCode.SCHEMA_INCOMPATIBLE: "Run storage schema is incompatible",
+}
+
+
+def safe_repository_error_message(code: RunRepositoryErrorCode) -> str:
+    """Return the constant public message for a stable repository error."""
+
+    if not isinstance(code, RunRepositoryErrorCode):
+        raise TypeError("code must be RunRepositoryErrorCode")
+    return _SAFE_REPOSITORY_MESSAGES[code]
+
+
+class RunRepositoryError(Exception):
+    """A stable storage-boundary error that never echoes database details."""
+
+    def __init__(
+        self,
+        code: RunRepositoryErrorCode,
+        *,
+        correlation_id: CorrelationId | None = None,
+    ) -> None:
+        if not isinstance(code, RunRepositoryErrorCode):
+            raise TypeError("code must be RunRepositoryErrorCode")
+        if correlation_id is not None and not isinstance(correlation_id, CorrelationId):
+            raise TypeError("correlation_id must be CorrelationId")
+        self.code = code
+        self.correlation_id = correlation_id
+        super().__init__(safe_repository_error_message(code))
+
+    def __str__(self) -> str:
+        suffix = (
+            f" (correlation_id={self.correlation_id})" if self.correlation_id is not None else ""
+        )
+        return f"{safe_repository_error_message(self.code)}{suffix}"
+
+    def __repr__(self) -> str:
+        correlation_id = (
+            repr(str(self.correlation_id)) if self.correlation_id is not None else "None"
+        )
+        return f"RunRepositoryError(code={self.code.value!r}, correlation_id={correlation_id})"
 
 
 @dataclass(frozen=True, slots=True)

@@ -163,6 +163,17 @@ CI 中第三方 Action 已固定到 v7 的完整 commit SHA，升级时要核对
 四类 feature 工件、核心实现路径、四层架构规则和关键治理文件不能仅靠修改
 `design-map.json` 解除。
 
+### 7.1 PostgreSQL 实现门禁
+
+- 真实数据库模块必须在模块级声明 `postgresql` marker；快速门禁固定使用
+  `not online and not postgresql`，数据库门禁独立使用 PostgreSQL 18.6 服务。
+- CI 必须先证明 PostgreSQL 集合非空，且 contract/integration/performance 数据库路径不会
+  被快速门禁收集；缺少数据库 URL 时真实库门禁失败，不能静默 skip。
+- Schema 只能通过独立 `alembic upgrade head` 发布，并执行 `current --check-heads` 与
+  `alembic check`；应用构造和启动禁止 `create_all`、stamp、upgrade 或自动修复。
+- destructive downgrade/restore 只允许在身份已核验的一次性数据库执行，生产数据回退必须
+  先备份并恢复到新数据库验证后切换。
+
 ## 8. Spec Kit 维护
 
 本仓库使用官方生成的 `.specify/` 基础设施，项目扩展放在

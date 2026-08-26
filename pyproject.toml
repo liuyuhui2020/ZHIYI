@@ -9,10 +9,13 @@ description = "Recoverable, governed agent runtime platform"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+  "alembic==1.19.1",
   "langchain-anthropic==1.6.1",
   "langchain-core==1.6.0",
   "langchain-openai==1.6.0",
+  "psycopg[binary]==3.3.4",
   "pydantic==2.13.4",
+  "sqlalchemy[asyncio]==2.0.52",
 ]
 
 [dependency-groups]
@@ -30,6 +33,7 @@ testpaths = ["tests"]
 markers = [
   "online: opt-in test that calls a paid model provider",
   "performance: deterministic local performance acceptance test",
+  "postgresql: test that requires the disposable PostgreSQL acceptance environment",
 ]
 
 [tool.ruff]

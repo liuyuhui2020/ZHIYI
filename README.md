@@ -12,7 +12,7 @@
   </h1>
   <p>
     <strong>Self-hosted Agent Runtime Platform for recoverable, governed execution</strong><br>
-    <sub>Design baseline · Two M0 foundation slices implemented · Product Runtime incomplete</sub>
+    <sub>Design baseline · Three M0 foundation slices implemented · Product Runtime incomplete</sub>
   </p>
   <p>
     <a href="./doc/PROJECT.md"><strong>Roadmap</strong></a> ·
@@ -21,7 +21,7 @@
     <a href="./doc/SDD开发规范.md"><strong>Development Guide</strong></a>
   </p>
   <p>
-    <img alt="Project stage: two M0 foundation slices" src="https://img.shields.io/badge/stage-two%20M0%20foundation%20slices-f59e0b?style=flat-square">
+    <img alt="Project stage: three M0 foundation slices" src="https://img.shields.io/badge/stage-three%20M0%20foundation%20slices-f59e0b?style=flat-square">
     <img alt="Python target: 3.12" src="https://img.shields.io/badge/Python-target%203.12-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white">
     <img alt="FastAPI target" src="https://img.shields.io/badge/FastAPI-target-009688?style=flat-square&amp;logo=fastapi&amp;logoColor=white">
     <img alt="LangChain target" src="https://img.shields.io/badge/LangChain-target-1C3C3C?style=flat-square">
@@ -49,12 +49,12 @@
 ## Overview
 
 > [!IMPORTANT]
-> ZHIYI is currently in the **design baseline with two approved M0 foundation slices**.
+> ZHIYI is currently in the **design baseline with three approved M0 foundation slices**.
 > The repository includes the product design, Spec Kit SDD workflow, design-drift
 > checks, Git hooks, CI, an implemented provider-neutral Model Gateway, and a
-> framework-free Run Lifecycle Kernel with an in-memory repository. PostgreSQL
-> persistence, leases, recoverable workers, API, SDK, checkpointing, and console
-> remain unimplemented; these foundations are not yet a usable Agent Runtime.
+> framework-free Run Lifecycle Kernel, and a PostgreSQL 18.6 RunRepository with
+> explicit Alembic migrations. Leases, recoverable workers, API, SDK, checkpointing,
+> and console remain unimplemented; these foundations are not yet a usable Agent Runtime.
 
 ZHIYI is a self-hosted agent runtime platform for agent developers and platform
 teams. It goes beyond demonstration-level tool calling by providing a stable
@@ -68,7 +68,8 @@ effects and require recovery and auditing.
 | Official website and documentation portal | Local static build complete; not deployed |
 | Model Gateway, Fake/OpenAI/Anthropic adapters, Tool/Structured Output, retry/Fallback | Implemented and offline-tested |
 | Run lifecycle state machine, hard budget, command idempotency, safe events/results, in-memory repository | Implemented and offline-tested |
-| PostgreSQL persistence, leases, REST/SSE, worker, and checkpointing | Planned for M0 |
+| PostgreSQL Run/Event/CommandReceipt persistence and explicit migration lane | Implemented and tested on PostgreSQL 18.6 |
+| Leases, REST/SSE, worker, and checkpointing | Planned for M0 |
 | Context, memory, RAG, tool approvals, and Langfuse | Planned for M1 |
 | MCP, subagents, OIDC/RBAC, Helm, and production gates | Planned for M2 |
 
@@ -219,7 +220,7 @@ implementation.
 
 ## Contributing to Design and Development
 
-The Model Gateway and Run Lifecycle Kernel are the first two approved
+The Model Gateway, Run Lifecycle Kernel, and PostgreSQL RunRepository are the first three approved
 product-code foundation slices. Every additional Runtime capability still
 requires its own Spec Kit artifacts, drift analysis, tests, and explicit
 implementation approval.
@@ -236,11 +237,24 @@ uv sync --all-groups --frozen --python 3.12
 Run the local Python release gate without paid Provider calls:
 
 ```bash
-uv run pytest -m "not online"
-uv run ruff check src tests
-uv run ruff format --check src tests
+uv run pytest -m "not online and not postgresql"
+uv run ruff check src tests migrations
+uv run ruff format --check src tests migrations
 uv run mypy
 ```
+
+The real-database lane requires the disposable service and an explicit migration:
+
+```bash
+docker compose -f compose.test.yaml up -d --wait postgresql
+export ZHIYI_TEST_DATABASE_URL='postgresql+psycopg://zhiyi_test:zhiyi_test_password@127.0.0.1:55432/zhiyi_test'
+uv run alembic upgrade head
+uv run pytest -m postgresql
+```
+
+Application construction never creates, upgrades, stamps, or repairs the schema. See
+[`specs/005-postgresql-run-repository/quickstart.md`](./specs/005-postgresql-run-repository/quickstart.md)
+for destructive disposable downgrade and restore guards.
 
 Before any additional product implementation begins:
 
