@@ -1,7 +1,7 @@
 # ZHIYI Agent Runtime Platform 项目说明
 
-> 当前阶段：方案基线与首个 M0 实现切片
-> 项目状态：Model Gateway 已实现并通过离线门禁；完整 Runtime 尚未实现，官网尚未部署
+> 当前阶段：方案基线与两个 M0 基础实现切片
+> 项目状态：Model Gateway 与 Run Lifecycle Kernel 已通过离线门禁；完整 Runtime 尚未实现，官网尚未部署
 > 文档版本：v0.1
 > 更新日期：2026-08-24
 
@@ -40,11 +40,15 @@ ZHIYI 是一个面向开发者、自托管、基于 LangChain 生态的 Agent Ru
 - 完成 Fake、OpenAI、Anthropic Provider，文本/流式、Tool Calling、Structured
   Output、保守 Token 预检、用量、总超时、有限重试、限流、熔断和兼容 Fallback。
 - 完成密钥引用边界、离线契约/并发/性能测试；真实 Provider 冒烟测试默认跳过且必须显式授权。
+- 完成框架无关的 Run Lifecycle Kernel：固定 AgentVersion、完整状态转换、硬预算与
+  deadline、取消、不可变 RunResult、版本化安全事件和稳定错误分类。
+- 完成命令意图幂等、乐观并发、租户隔离、原子 Run/Event/Receipt 仓储端口与内存
+  适配器，并通过 1,000 路并发单赢家和 10,000 次领域迁移性能门禁。
 
 ### 未开始
 
 - 数据库 Schema 与迁移。
-- Agent/Run Runtime、API、Worker、Checkpoint、SDK 和 Console 实现。
+- PostgreSQL Run 仓储、租约、Worker、Checkpoint、API、SDK 和 Console 实现。
 - Runtime 级恢复测试、容量压测、安全审计和部署。
 
 ### 历史规划草案
@@ -277,10 +281,10 @@ M1 只面向可信开发或试点环境，不开放通用外部生产流量。
 
 ### 11.3 进入下一阶段
 
-Model Gateway 不代表 M0 Runtime 完成。下一实现切片必须围绕 Agent/Run 领域、持久化
-边界或 Worker 恢复机制单独建立 Spec Kit Feature，完成 `spec → plan → tasks →
-analyze`、测试与漂移门禁，并再次获得明确批准；不得直接把 Provider 调用包装成
-无持久化、不可恢复的同步 Agent Loop。
+Model Gateway 与 Run Lifecycle Kernel 仍不代表 M0 Runtime 完成。下一实现切片应优先
+实现 PostgreSQL Run/Event/CommandReceipt 仓储、领取租约与 Worker 恢复边界，并通过
+独立 Spec Kit Feature 完成 `spec → plan → tasks → analyze`、测试与漂移门禁；不得把
+内存适配器或 Provider 调用包装成无持久化、不可恢复的同步 Agent Loop。
 
 ## 12. 项目健康指标
 
