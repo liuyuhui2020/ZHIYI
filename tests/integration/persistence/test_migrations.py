@@ -15,10 +15,15 @@ from conftest import ROOT, alembic_config, require_postgresql_database_url
 from psycopg import sql
 from sqlalchemy import event, inspect, text
 from sqlalchemy.engine import Connection, make_url
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 
 from zhiyi.adapters.persistence.postgresql_run_repository import PostgreSQLRunRepository
+from zhiyi.adapters.persistence.postgresql_worker_lease_repository import (
+    PostgreSQLWorkerLeaseRepository,
+)
+from zhiyi.application.commands.worker_leases import ClaimLeaseCommand
 from zhiyi.application.ports.run_repository import CommandReceipt
+from zhiyi.application.ports.worker_lease_observability import LeaseOperationObservation
 from zhiyi.domain.runs.aggregate import Run
 from zhiyi.domain.runs.budget import RunBudget
 from zhiyi.domain.runs.events import RunEvent
@@ -32,11 +37,13 @@ from zhiyi.domain.runs.identifiers import (
     TaskId,
     TenantId,
 )
+from zhiyi.domain.worker_leases.identifiers import WorkerId
 from zhiyi.infrastructure.database.engine import (
     create_postgresql_engine,
     dispose_postgresql_engine,
 )
 from zhiyi.infrastructure.database.schema_compatibility import ensure_schema_compatible
+from zhiyi.infrastructure.security.lease_tokens import SecureLeaseTokenGenerator
 
 pytestmark = pytest.mark.postgresql
 RESTORE_DATABASE = "zhiyi_005_restore"
@@ -226,6 +233,17 @@ def _representative_run() -> tuple[Run, CommandReceipt, tuple[RunEvent, ...]]:
     return mutation.run, receipt, mutation.events
 
 
+class _MigrationTelemetry:
+    def record_log(self, observation: LeaseOperationObservation) -> None:
+        pass
+
+    def record_metric(self, observation: LeaseOperationObservation) -> None:
+        pass
+
+    def record_trace(self, observation: LeaseOperationObservation) -> None:
+        pass
+
+
 async def _fact_digests(engine: AsyncEngine) -> tuple[str | None, ...]:
     statements = (
         "SELECT md5(COALESCE(string_agg(row_to_json(fact)::text, '' "
@@ -234,6 +252,10 @@ async def _fact_digests(engine: AsyncEngine) -> tuple[str | None, ...]:
         "ORDER BY event_id), '')) FROM run_events fact",
         "SELECT md5(COALESCE(string_agg(row_to_json(fact)::text, '' "
         "ORDER BY tenant_id, command_id), '')) FROM run_command_receipts fact",
+        "SELECT md5(COALESCE(string_agg(row_to_json(fact)::text, '' "
+        "ORDER BY tenant_id, run_id), '')) FROM worker_leases fact",
+        "SELECT md5(COALESCE(string_agg(row_to_json(fact)::text, '' "
+        "ORDER BY tenant_id, claim_id), '')) FROM worker_lease_claim_receipts fact",
     )
     async with engine.connect() as connection:
         digests: list[str | None] = []
@@ -308,6 +330,24 @@ async def test_application_compatibility_check_executes_no_ddl() -> None:
     assert ddl_statements == []
 
 
+async def test_head_preserves_run_repository_and_adds_worker_component() -> None:
+    engine = create_postgresql_engine(require_postgresql_database_url())
+    try:
+        async with engine.connect() as connection:
+            component_rows = (
+                await connection.execute(
+                    text(
+                        "SELECT component, contract_version "
+                        "FROM zhiyi_schema_compatibility ORDER BY component"
+                    )
+                )
+            ).all()
+            components = [(str(row[0]), int(row[1])) for row in component_rows]
+        assert components == [("run_repository", 1), ("worker_lease_kernel", 1)]
+    finally:
+        await dispose_postgresql_engine(engine)
+
+
 async def test_seed_representative_data_dump_restore_and_domain_round_trip(
     postgresql_engine: AsyncEngine,
 ) -> None:
@@ -321,17 +361,31 @@ async def test_seed_representative_data_dump_restore_and_domain_round_trip(
         new_events=events,
         receipt=receipt,
     )
+    lease_repository = PostgreSQLWorkerLeaseRepository(
+        postgresql_engine,
+        telemetry=_MigrationTelemetry(),
+        token_generator=SecureLeaseTokenGenerator(),
+    )
+    claim_command = ClaimLeaseCommand(
+        expected_run.tenant_id,
+        WorkerId("worker-migration-restore"),
+        await lease_repository.issue_claim_id(),
+    )
+    claimed = await lease_repository.claim(claim_command)
+    assert claimed.grant is not None
     source_digests = await _fact_digests(postgresql_engine)
     container = _postgres_container()
     dump = _logical_dump(container)
     assert dump.startswith(b"PGDMP")
 
     admin = _connection_info(url, database="postgres")
-    with psycopg.connect(admin, autocommit=True) as connection:
-        connection.execute(
+    with psycopg.connect(admin, autocommit=True) as admin_connection:
+        admin_connection.execute(
             sql.SQL("DROP DATABASE IF EXISTS {}").format(sql.Identifier(RESTORE_DATABASE))
         )
-        connection.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(RESTORE_DATABASE)))
+        admin_connection.execute(
+            sql.SQL("CREATE DATABASE {}").format(sql.Identifier(RESTORE_DATABASE))
+        )
     _restore_dump(container, dump)
 
     restored_url = _replace_database(url, RESTORE_DATABASE)
@@ -348,16 +402,40 @@ async def test_seed_representative_data_dump_restore_and_domain_round_trip(
         )
         assert replay is not None and replay.receipt == receipt
         restored_counts: list[int | None] = []
-        async with restored_engine.connect() as connection:
-            for table in ("runs", "run_events", "run_command_receipts"):
+        async with restored_engine.connect() as restored_connection:
+            for table in (
+                "runs",
+                "run_events",
+                "run_command_receipts",
+                "worker_leases",
+                "worker_lease_claim_receipts",
+            ):
                 restored_counts.append(
-                    await connection.scalar(text(f"SELECT count(*) FROM {table}"))
+                    await restored_connection.scalar(text(f"SELECT count(*) FROM {table}"))
                 )
-        assert restored_counts == [1, 1, 1]
+        assert restored_counts == [1, 1, 1, 1, 1]
         assert await _fact_digests(restored_engine) == source_digests
+
+        class RestoredClockRepository(PostgreSQLWorkerLeaseRepository):
+            async def _database_now(self, connection: AsyncConnection) -> datetime:
+                assert claimed.grant is not None
+                return claimed.grant.lease_expires_at
+
+        restored_lease_repository = RestoredClockRepository(
+            restored_engine,
+            telemetry=_MigrationTelemetry(),
+            token_generator=SecureLeaseTokenGenerator(),
+        )
+        restored_replay = await restored_lease_repository.claim(claim_command)
+        assert restored_replay.grant is not None
+        assert restored_replay.grant.token == claimed.grant.token
+        assert restored_replay.grant.currently_authoritative is False
+        assert (
+            await restored_lease_repository.get_authority(claimed.grant.proof)
+        ).authoritative is False
     finally:
         await dispose_postgresql_engine(restored_engine)
-        with psycopg.connect(admin, autocommit=True) as connection:
-            connection.execute(
+        with psycopg.connect(admin, autocommit=True) as admin_connection:
+            admin_connection.execute(
                 sql.SQL("DROP DATABASE IF EXISTS {}").format(sql.Identifier(RESTORE_DATABASE))
             )

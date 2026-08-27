@@ -12,7 +12,7 @@
   </h1>
   <p>
     <strong>Self-hosted Agent Runtime Platform for recoverable, governed execution</strong><br>
-    <sub>Design baseline · Three M0 foundation slices implemented · Product Runtime incomplete</sub>
+    <sub>Design baseline · Four M0 foundation slices implemented · Product Runtime incomplete</sub>
   </p>
   <p>
     <a href="./doc/PROJECT.md"><strong>Roadmap</strong></a> ·
@@ -21,7 +21,7 @@
     <a href="./doc/SDD开发规范.md"><strong>Development Guide</strong></a>
   </p>
   <p>
-    <img alt="Project stage: three M0 foundation slices" src="https://img.shields.io/badge/stage-three%20M0%20foundation%20slices-f59e0b?style=flat-square">
+    <img alt="Project stage: four M0 foundation slices" src="https://img.shields.io/badge/stage-four%20M0%20foundation%20slices-f59e0b?style=flat-square">
     <img alt="Python target: 3.12" src="https://img.shields.io/badge/Python-target%203.12-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white">
     <img alt="FastAPI target" src="https://img.shields.io/badge/FastAPI-target-009688?style=flat-square&amp;logo=fastapi&amp;logoColor=white">
     <img alt="LangChain target" src="https://img.shields.io/badge/LangChain-target-1C3C3C?style=flat-square">
@@ -49,12 +49,14 @@
 ## Overview
 
 > [!IMPORTANT]
-> ZHIYI is currently in the **design baseline with three approved M0 foundation slices**.
+> ZHIYI is currently in the **design baseline with four approved M0 foundation slices**.
 > The repository includes the product design, Spec Kit SDD workflow, design-drift
 > checks, Git hooks, CI, an implemented provider-neutral Model Gateway, and a
 > framework-free Run Lifecycle Kernel, and a PostgreSQL 18.6 RunRepository with
-> explicit Alembic migrations. Leases, recoverable workers, API, SDK, checkpointing,
-> and console remain unimplemented; these foundations are not yet a usable Agent Runtime.
+> explicit Alembic migrations. The PostgreSQL Worker Lease Kernel provides claim,
+> authority, renew, release, inactive observation, and lease-guarded Run writes.
+> Worker loops, recovery, API, SDK, checkpointing, and console remain unimplemented;
+> these foundations are not yet a usable Agent Runtime.
 
 ZHIYI is a self-hosted agent runtime platform for agent developers and platform
 teams. It goes beyond demonstration-level tool calling by providing a stable
@@ -69,7 +71,8 @@ effects and require recovery and auditing.
 | Model Gateway, Fake/OpenAI/Anthropic adapters, Tool/Structured Output, retry/Fallback | Implemented and offline-tested |
 | Run lifecycle state machine, hard budget, command idempotency, safe events/results, in-memory repository | Implemented and offline-tested |
 | PostgreSQL Run/Event/CommandReceipt persistence and explicit migration lane | Implemented and tested on PostgreSQL 18.6 |
-| Leases, REST/SSE, worker, and checkpointing | Planned for M0 |
+| PostgreSQL Worker Lease Kernel and lease-guarded Run writes | Implemented and tested on PostgreSQL 18.6 |
+| Worker loop, REST/SSE, recovery, and checkpointing | Planned for M0 |
 | Context, memory, RAG, tool approvals, and Langfuse | Planned for M1 |
 | MCP, subagents, OIDC/RBAC, Helm, and production gates | Planned for M2 |
 
@@ -220,10 +223,10 @@ implementation.
 
 ## Contributing to Design and Development
 
-The Model Gateway, Run Lifecycle Kernel, and PostgreSQL RunRepository are the first three approved
-product-code foundation slices. Every additional Runtime capability still
-requires its own Spec Kit artifacts, drift analysis, tests, and explicit
-implementation approval.
+The Model Gateway, Run Lifecycle Kernel, PostgreSQL RunRepository, and Worker Lease
+Kernel are the first four approved product-code foundation slices. Every additional
+Runtime capability still requires its own Spec Kit artifacts, drift analysis, tests,
+and explicit implementation approval.
 
 After cloning, install the versioned Git hooks and the frozen Python environment:
 
@@ -252,9 +255,27 @@ uv run alembic upgrade head
 uv run pytest -m postgresql
 ```
 
+Feature 006 can be exercised with focused real-database, fault-window, and performance
+commands:
+
+```bash
+uv run pytest -m postgresql tests/contract/persistence/test_postgresql_worker_lease_repository_contract.py
+uv run pytest -m postgresql tests/integration/persistence/test_postgresql_worker_lease_faults.py
+uv run pytest -m postgresql tests/performance/test_postgresql_worker_lease_kernel.py
+uv run alembic current --check-heads
+uv run alembic check
+```
+
 Application construction never creates, upgrades, stamps, or repairs the schema. See
-[`specs/005-postgresql-run-repository/quickstart.md`](./specs/005-postgresql-run-repository/quickstart.md)
-for destructive disposable downgrade and restore guards.
+[`specs/006-worker-lease-kernel/quickstart.md`](./specs/006-worker-lease-kernel/quickstart.md)
+for focused acceptance, fault injection, performance, destructive disposable downgrade,
+and restore guards.
+
+> [!WARNING]
+> Feature 006 is an M0 persistence kernel, not production enablement. Successful claim
+> receipts retain a restricted raw replay token without a physical retention maximum or
+> encryption/key-rotation design. Production also requires monitored PostgreSQL/host NTP
+> offset and backward-jump alerts. Both remain hard rollout blockers.
 
 Before any additional product implementation begins:
 

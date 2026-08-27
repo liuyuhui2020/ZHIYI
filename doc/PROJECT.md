@@ -1,9 +1,9 @@
 # ZHIYI Agent Runtime Platform 项目说明
 
-> 当前阶段：方案基线与三个 M0 基础实现切片
-> 项目状态：Model Gateway、Run Lifecycle Kernel 与 PostgreSQL RunRepository 已通过对应门禁；完整 Runtime 尚未实现，官网尚未部署
+> 当前阶段：方案基线与四个 M0 基础实现切片
+> 项目状态：Model Gateway、Run Lifecycle Kernel、PostgreSQL RunRepository 与 Worker Lease Kernel 已实现并通过对应测试；完整 Runtime 尚未实现，官网尚未部署
 > 文档版本：v0.1
-> 更新日期：2026-08-25
+> 更新日期：2026-08-27
 
 ## 1. 项目章程
 
@@ -46,11 +46,17 @@ ZHIYI 是一个面向开发者、自托管、基于 LangChain 生态的 Agent Ru
   适配器，并通过 1,000 路并发单赢家和 10,000 次领域迁移性能门禁。
 - 完成 PostgreSQL 18.6 Run/Event/CommandReceipt 仓储、SQLAlchemy Core 异步适配器、
   Alembic 显式迁移、结构兼容性门禁、跨进程命令回放、租户/全局事件隔离以及三类提交
-  故障窗口验证；应用启动不执行 DDL，Worker 与租约未进入本切片。
+  故障窗口验证；应用启动不执行 DDL。
+- 完成 PostgreSQL Worker Lease Kernel：租户内 FIFO 领取、24 小时领取回放、数据库权威
+  时间、权限读取、单调续租/释放、失效 `running` 观察及同事务租约守卫写入；真实库已覆盖
+  并发、公平探测、重启、故障收敛、租户隔离、迁移/恢复、脱敏与性能门禁。
+- 保持 004/005 契约不变：租约操作不改变 Run/Event/CommandReceipt，普通生命周期命令仍
+  使用原端口，只有 Worker 产出的新写入使用更强的 `commit_with_lease` 原子 fencing 边界。
 
 ### 未开始
 
-- PostgreSQL 领取租约、Worker、Checkpoint、API、SDK 和 Console 实现。
+- Worker 循环、LangGraph/Checkpoint、Agent/模型/Tool/Graph 执行、Reconciler、恢复编排、
+  API、SDK 和 Console 实现。
 - Runtime 级恢复测试、容量压测、安全审计和部署。
 
 ### 历史规划草案
@@ -283,10 +289,15 @@ M1 只面向可信开发或试点环境，不开放通用外部生产流量。
 
 ### 11.3 进入下一阶段
 
-Model Gateway、Run Lifecycle Kernel 与 PostgreSQL RunRepository 仍不代表 M0 Runtime
-完成。下一实现切片应优先建立领取租约与 Worker 恢复边界，并通过
-独立 Spec Kit Feature 完成 `spec → plan → tasks → analyze`、测试与漂移门禁；不得把
-内存适配器或 Provider 调用包装成无持久化、不可恢复的同步 Agent Loop。
+Model Gateway、Run Lifecycle Kernel、PostgreSQL RunRepository 与 Worker Lease Kernel 仍不
+代表 M0 Runtime 完成。Feature 006 只交付领取、权限读取、续租、释放、失效观察和租约守卫
+写入的 PostgreSQL 持久化协调内核；它不包含 Worker 循环、执行或恢复。Worker、Checkpoint、
+Agent 执行和 Reconciler 必须由后续独立 Feature 建模，不得把 Provider 调用包装成无持久化、
+不可恢复的同步 Agent Loop。
+
+Feature 006 也不得用于生产启用：成功领取收据会保留受限投影的原始 replay token，但当前没有
+物理保留上限、静态加密或密钥轮换方案；生产 PostgreSQL/主机的 NTP 偏差与时间回拨监控也尚未
+建立。这两项必须由后续安全/运维 Feature 完成并单独授权后，才可进入生产 rollout。
 
 ## 12. 项目健康指标
 

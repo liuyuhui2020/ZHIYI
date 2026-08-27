@@ -26,7 +26,7 @@ async def test_compatible_schema_is_cached_for_engine_lifecycle(
     await schema_compatibility.ensure_schema_compatible(engine)  # type: ignore[arg-type]
     await schema_compatibility.ensure_schema_compatible(engine)  # type: ignore[arg-type]
 
-    read.assert_awaited_once_with(engine)
+    read.assert_awaited_once_with(engine, component="run_repository")
 
 
 @pytest.mark.parametrize("version", [None, 0, 2, True, "1", 1.0])
@@ -62,7 +62,7 @@ class _FailingConnection:
     async def __aexit__(self, *args: object) -> None:
         return None
 
-    async def scalar(self, statement: object) -> object:
+    async def scalar(self, statement: object, parameters: object = None) -> object:
         raise ProgrammingError(
             "redacted statement",
             {},
@@ -82,7 +82,8 @@ class _FailingEngine:
 async def test_only_missing_relation_or_column_is_partial_schema(sqlstate: str) -> None:
     with pytest.raises(schema_compatibility.PartialSchemaError):
         await schema_compatibility._read_contract_version(
-            _FailingEngine(sqlstate)  # type: ignore[arg-type]
+            _FailingEngine(sqlstate),  # type: ignore[arg-type]
+            component="run_repository",
         )
 
 
@@ -124,6 +125,18 @@ async def test_check_never_creates_or_upgrades_schema(monkeypatch: pytest.Monkey
     monkeypatch.delattr(schema_compatibility, "create_all", raising=False)
     await schema_compatibility.ensure_schema_compatible(engine)  # type: ignore[arg-type]
     assert read.await_count == 1
+
+
+async def test_legacy_wrapper_still_checks_only_run_repository_component(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    engine = _Engine()
+    read = AsyncMock(return_value=1)
+    monkeypatch.setattr(schema_compatibility, "_read_contract_version", read)
+
+    await schema_compatibility.ensure_schema_compatible(engine)  # type: ignore[arg-type]
+
+    read.assert_awaited_once_with(engine, component="run_repository")
 
 
 async def test_compatibility_cache_is_scoped_to_each_engine_lifecycle(
