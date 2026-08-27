@@ -44,7 +44,10 @@ async def contract_engine(migrated_url: str) -> AsyncIterator[AsyncEngine]:
     engine = create_postgresql_engine(migrated_url)
     async with engine.begin() as connection:
         await connection.execute(
-            text("TRUNCATE run_command_receipts, run_events, runs RESTART IDENTITY CASCADE")
+            text(
+                "TRUNCATE worker_lease_claim_receipts, worker_leases, "
+                "run_command_receipts, run_events, runs RESTART IDENTITY CASCADE"
+            )
         )
     try:
         yield engine

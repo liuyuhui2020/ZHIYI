@@ -4,6 +4,7 @@ from zhiyi.application.services.circuit_breaker import CircuitBreaker, CircuitSt
 from zhiyi.application.services.model_gateway import DefaultModelGateway
 from zhiyi.application.services.rate_limiter import AsyncTokenBucket
 from zhiyi.application.services.run_lifecycle import DeadlineOutcome, RunLifecycleService
+from zhiyi.application.services.worker_lease_kernel import WorkerLeaseKernel
 
 __all__ = [
     "AsyncTokenBucket",
@@ -12,4 +13,5 @@ __all__ = [
     "DeadlineOutcome",
     "DefaultModelGateway",
     "RunLifecycleService",
+    "WorkerLeaseKernel",
 ]

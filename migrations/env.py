@@ -9,6 +9,12 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from zhiyi.adapters.persistence.postgresql_schema import metadata
+from zhiyi.adapters.persistence.postgresql_worker_lease_schema import (
+    worker_lease_claim_receipts,
+    worker_leases,
+)
+
+_reviewed_worker_lease_tables = (worker_leases, worker_lease_claim_receipts)
 
 config = context.config
 if config.config_file_name is not None:

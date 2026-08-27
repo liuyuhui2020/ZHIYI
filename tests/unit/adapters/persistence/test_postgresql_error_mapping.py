@@ -7,9 +7,9 @@ from dataclasses import dataclass
 import pytest
 
 from zhiyi.adapters.persistence.postgresql_run_repository import (
-    TransactionPhase,
     classify_storage_failure,
 )
+from zhiyi.adapters.persistence.postgresql_transaction_support import TransactionPhase
 from zhiyi.application.ports.run_repository import RunRepositoryErrorCode
 
 

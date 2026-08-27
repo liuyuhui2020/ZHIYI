@@ -7,7 +7,7 @@ import re
 from collections.abc import Mapping
 from contextlib import suppress
 from dataclasses import dataclass
-from enum import StrEnum
+from datetime import datetime
 from typing import Any
 from typing import cast as type_cast
 
@@ -32,6 +32,25 @@ from zhiyi.adapters.persistence.postgresql_schema import (
     run_events,
     runs,
 )
+from zhiyi.adapters.persistence.postgresql_transaction_support import (
+    PostgreSQLTransactionSettings,
+    StorageFailureDisposition,
+    TransactionPhase,
+    apply_transaction_settings,
+    arbitrate_complete_receipt,
+    execute_once,
+)
+from zhiyi.adapters.persistence.postgresql_transaction_support import (
+    classify_storage_failure as classify_transaction_storage_failure,
+)
+from zhiyi.adapters.persistence.postgresql_transaction_support import (
+    rollback_if_active as _rollback_if_active,
+)
+from zhiyi.adapters.persistence.postgresql_worker_lease_codecs import (
+    WorkerLeaseRecord,
+    decode_worker_lease,
+)
+from zhiyi.adapters.persistence.postgresql_worker_lease_schema import worker_leases
 from zhiyi.application.ports.run_repository import (
     CommandReceipt,
     CommitOutcome,
@@ -40,15 +59,26 @@ from zhiyi.application.ports.run_repository import (
     RunRepositoryErrorCode,
 )
 from zhiyi.application.ports.run_repository_validation import validate_commit_candidate
+from zhiyi.application.ports.worker_lease_observability import (
+    LeaseOperation,
+    LeaseOperationObservation,
+    LeaseTransactionPhase,
+    WorkerLeaseTelemetry,
+    deliver_terminal_observation,
+)
 from zhiyi.domain.runs.aggregate import Run
 from zhiyi.domain.runs.errors import RunErrorCode, RunLifecycleError
 from zhiyi.domain.runs.events import RunEvent, RunEventType
 from zhiyi.domain.runs.identifiers import CommandId, RunId, TenantId
-from zhiyi.infrastructure.database.schema_compatibility import ensure_schema_compatible
+from zhiyi.domain.worker_leases.errors import WorkerLeaseError, WorkerLeaseErrorCode
+from zhiyi.domain.worker_leases.models import LeaseAuthorityProof
+from zhiyi.infrastructure.database.schema_compatibility import (
+    ensure_schema_compatible,
+    ensure_worker_lease_schema_compatible,
+)
+from zhiyi.infrastructure.security.lease_tokens import lease_token_matches
 
 _FINGERPRINT_PATTERN = re.compile(r"sha256:[0-9a-f]{64}\Z")
-_KNOWN_ROLLBACK_SQLSTATES = frozenset({"40001", "40P01", "55P03", "57014", "57P01"})
-_UNKNOWN_OUTCOME_SQLSTATES = frozenset({"08007", "40003"})
 _LOGGER = logging.getLogger(__name__)
 _COMMAND_EVENT_TYPES = {
     "create_run": RunEventType.RUN_CREATED,
@@ -71,29 +101,6 @@ class _EncodedCommitCandidate:
     events: tuple[Mapping[str, object], ...]
 
 
-class TransactionPhase(StrEnum):
-    ACQUIRE = "acquire"
-    BEGIN = "begin"
-    ARBITRATION = "arbitration"
-    LOCK = "lock"
-    WRITE = "write"
-    COMMIT = "commit"
-    COMPLETE = "complete"
-
-
-def _sqlstate(error: BaseException) -> str | None:
-    candidate: object = error
-    for _ in range(3):
-        value = getattr(candidate, "sqlstate", None) or getattr(candidate, "pgcode", None)
-        if type(value) is str:
-            return value
-        nested = getattr(candidate, "orig", None)
-        if not isinstance(nested, BaseException):
-            break
-        candidate = nested
-    return None
-
-
 def classify_storage_failure(
     error: BaseException,
     *,
@@ -102,16 +109,16 @@ def classify_storage_failure(
 ) -> RunRepositoryErrorCode:
     """Classify a storage failure without inspecting or exposing query values."""
 
-    state = _sqlstate(error)
-    if rollback_confirmed or state in _KNOWN_ROLLBACK_SQLSTATES:
-        return RunRepositoryErrorCode.STORAGE_UNAVAILABLE
-    if phase is TransactionPhase.COMMIT and (
-        state in _UNKNOWN_OUTCOME_SQLSTATES
-        or bool(getattr(error, "connection_invalidated", False))
-        or state is None
-    ):
-        return RunRepositoryErrorCode.COMMIT_OUTCOME_UNKNOWN
-    return RunRepositoryErrorCode.STORAGE_UNAVAILABLE
+    disposition = classify_transaction_storage_failure(
+        error,
+        phase=phase,
+        rollback_confirmed=rollback_confirmed,
+    )
+    return (
+        RunRepositoryErrorCode.COMMIT_OUTCOME_UNKNOWN
+        if disposition is StorageFailureDisposition.UNKNOWN
+        else RunRepositoryErrorCode.STORAGE_UNAVAILABLE
+    )
 
 
 def _constraint_name(error: IntegrityError) -> str | None:
@@ -136,16 +143,6 @@ def _log_storage_failure(
             "run_id": str(run_id) if run_id is not None else None,
         },
     )
-
-
-async def _rollback_if_active(transaction: AsyncTransaction | None) -> bool:
-    if transaction is None or not transaction.is_active:
-        return False
-    try:
-        await transaction.rollback()
-    except Exception:
-        return False
-    return True
 
 
 def _validate_identity(tenant_id: TenantId, run_id: RunId | None = None) -> None:
@@ -285,6 +282,7 @@ class PostgreSQLRunRepository(RunRepository):
         self,
         engine: AsyncEngine,
         *,
+        telemetry: WorkerLeaseTelemetry | None = None,
         lock_timeout_ms: int = 5_000,
         statement_timeout_ms: int = 5_000,
     ) -> None:
@@ -293,8 +291,11 @@ class PostgreSQLRunRepository(RunRepository):
         if type(statement_timeout_ms) is not int or statement_timeout_ms < 1:
             raise ValueError("statement_timeout_ms must be positive")
         self._engine = engine
-        self._lock_timeout_ms = lock_timeout_ms
-        self._statement_timeout_ms = statement_timeout_ms
+        self._lease_telemetry = telemetry
+        self._transaction_settings = PostgreSQLTransactionSettings(
+            lock_timeout_ms=lock_timeout_ms,
+            statement_timeout_ms=statement_timeout_ms,
+        )
 
     async def load(self, tenant_id: TenantId, run_id: RunId) -> Run | None:
         _validate_identity(tenant_id, run_id)
@@ -464,32 +465,24 @@ class PostgreSQLRunRepository(RunRepository):
             connection = await self._engine.connect()
             phase = TransactionPhase.BEGIN
             transaction = await connection.begin()
-            await connection.execute(
-                text(
-                    "SELECT "
-                    "set_config('synchronous_commit', 'on', true), "
-                    "set_config('lock_timeout', :lock_timeout, true), "
-                    "set_config('statement_timeout', :statement_timeout, true)"
-                ),
-                {
-                    "lock_timeout": f"{self._lock_timeout_ms}ms",
-                    "statement_timeout": f"{self._statement_timeout_ms}ms",
-                },
-            )
+            await apply_transaction_settings(connection, self._transaction_settings)
             phase = TransactionPhase.ARBITRATION
-            inserted = await self._insert_receipt(connection, encoded.receipt)
-            await self._transaction_boundary("after_receipt", connection)
-            if not inserted:
-                replay = await self._find_command(
+            arbitration = await arbitrate_complete_receipt(
+                lambda: self._insert_receipt(connection, encoded.receipt),
+                lambda: self._find_command(
                     connection,
                     receipt.tenant_id,
                     receipt.command_id,
                     receipt.intent_fingerprint,
-                )
+                ),
+            )
+            await self._transaction_boundary("after_receipt", connection)
+            if not arbitration.inserted:
+                replay = arbitration.replay
                 if replay is None:
                     raise RunRepositoryError(RunRepositoryErrorCode.DATA_CORRUPTION)
                 await transaction.commit()
-                return replay
+                return type_cast(CommitOutcome, replay)
 
             current = None
             is_structural_create = (
@@ -534,7 +527,7 @@ class PostgreSQLRunRepository(RunRepository):
                 await self._transaction_boundary("after_event", connection)
             await self._transaction_boundary("before_commit", connection)
             phase = TransactionPhase.COMMIT
-            await self._commit_transaction(transaction)
+            await execute_once(lambda: self._commit_transaction(transaction))
             phase = TransactionPhase.COMPLETE
             return CommitOutcome(receipt=receipt, events=new_events, replayed=False)
         except (RunLifecycleError, RunRepositoryError):
@@ -572,6 +565,252 @@ class PostgreSQLRunRepository(RunRepository):
             if connection is not None:
                 with suppress(Exception):
                     await connection.close()
+
+    async def commit_with_lease(
+        self,
+        *,
+        proof: LeaseAuthorityProof,
+        expected_version: int,
+        updated_run: Run,
+        new_events: tuple[RunEvent, ...],
+        receipt: CommandReceipt,
+    ) -> CommitOutcome:
+        telemetry = self._require_lease_telemetry()
+        try:
+            self._validate_commit_input(expected_version, updated_run, new_events, receipt)
+            if not isinstance(proof, LeaseAuthorityProof):
+                raise WorkerLeaseError(WorkerLeaseErrorCode.INVALID_INPUT)
+            if (
+                proof.tenant_id != updated_run.tenant_id
+                or proof.run_id != updated_run.run_id
+                or receipt.tenant_id != proof.tenant_id
+                or receipt.run_id != proof.run_id
+            ):
+                raise WorkerLeaseError(WorkerLeaseErrorCode.INVALID_INPUT)
+            encoded = _encode_commit_candidate(updated_run, receipt, new_events)
+            await ensure_schema_compatible(self._engine)
+            await ensure_worker_lease_schema_compatible(self._engine)
+            outcome = await self._commit_with_lease_transaction(
+                proof=proof,
+                expected_version=expected_version,
+                updated_run=updated_run,
+                new_events=new_events,
+                receipt=receipt,
+                encoded=encoded,
+            )
+        except (RunLifecycleError, RunRepositoryError, WorkerLeaseError) as error:
+            self._observe_guarded_commit(telemetry, proof, error)
+            raise
+        self._observe_guarded_commit(telemetry, proof, outcome)
+        return outcome
+
+    def _require_lease_telemetry(self) -> WorkerLeaseTelemetry:
+        if not isinstance(self._lease_telemetry, WorkerLeaseTelemetry):
+            raise TypeError("telemetry is required for commit_with_lease")
+        return self._lease_telemetry
+
+    async def _commit_with_lease_transaction(
+        self,
+        *,
+        proof: LeaseAuthorityProof,
+        expected_version: int,
+        updated_run: Run,
+        new_events: tuple[RunEvent, ...],
+        receipt: CommandReceipt,
+        encoded: _EncodedCommitCandidate,
+    ) -> CommitOutcome:
+        connection: AsyncConnection | None = None
+        transaction: AsyncTransaction | None = None
+        phase = TransactionPhase.ACQUIRE
+        try:
+            connection = await self._engine.connect()
+            phase = TransactionPhase.BEGIN
+            transaction = await connection.begin()
+            await apply_transaction_settings(connection, self._transaction_settings)
+            phase = TransactionPhase.ARBITRATION
+            arbitration = await arbitrate_complete_receipt(
+                lambda: self._insert_receipt(connection, encoded.receipt),
+                lambda: self._find_command(
+                    connection,
+                    receipt.tenant_id,
+                    receipt.command_id,
+                    receipt.intent_fingerprint,
+                ),
+            )
+            await self._transaction_boundary("after_receipt", connection)
+            if not arbitration.inserted:
+                replay = arbitration.replay
+                if replay is None:
+                    raise RunRepositoryError(RunRepositoryErrorCode.DATA_CORRUPTION)
+                await execute_once(lambda: self._commit_transaction(transaction))
+                return type_cast(CommitOutcome, replay)
+
+            phase = TransactionPhase.LOCK
+            current_row = (
+                await connection.execute(
+                    _run_select()
+                    .where(
+                        runs.c.tenant_id == str(updated_run.tenant_id),
+                        runs.c.run_id == str(updated_run.run_id),
+                    )
+                    .with_for_update()
+                )
+            ).first()
+            if current_row is None:
+                raise WorkerLeaseError(WorkerLeaseErrorCode.LEASE_NOT_CURRENT)
+            current = decode_run(_record(current_row))
+            lease = await self._load_guarded_lease(connection, proof)
+            platform_now = await self._database_now(connection)
+            self._validate_current_lease(
+                proof,
+                lease,
+                run_status=current.status.value,
+                platform_now=platform_now,
+            )
+            if current.version != expected_version:
+                raise RunLifecycleError(RunErrorCode.VERSION_CONFLICT)
+
+            validate_commit_candidate(
+                expected_version=expected_version,
+                current=current,
+                updated_run=updated_run,
+                new_events=new_events,
+                receipt=receipt,
+                occupied_event_ids=frozenset(),
+            )
+
+            phase = TransactionPhase.WRITE
+            if new_events:
+                await self._update_run(connection, updated_run, encoded.run)
+            await self._transaction_boundary("after_run", connection)
+            for event_record in encoded.events:
+                await self._insert_event(connection, event_record)
+                await self._transaction_boundary("after_event", connection)
+            await self._transaction_boundary("before_commit", connection)
+            phase = TransactionPhase.COMMIT
+            await execute_once(lambda: self._commit_transaction(transaction))
+            return CommitOutcome(receipt=receipt, events=new_events, replayed=False)
+        except (RunLifecycleError, RunRepositoryError, WorkerLeaseError):
+            await _rollback_if_active(transaction)
+            raise
+        except IntegrityError as error:
+            await _rollback_if_active(transaction)
+            raise RunLifecycleError(RunErrorCode.INVARIANT_VIOLATION) from error
+        except (DBAPIError, SQLAlchemyError, ConnectionError) as error:
+            rollback_confirmed = await _rollback_if_active(transaction)
+            if connection is not None and (
+                bool(getattr(error, "connection_invalidated", False))
+                or phase is TransactionPhase.COMMIT
+            ):
+                with suppress(Exception):
+                    await connection.invalidate(error)
+            storage_code = classify_storage_failure(
+                error,
+                phase=phase,
+                rollback_confirmed=rollback_confirmed,
+            )
+            raise RunRepositoryError(storage_code) from error
+        finally:
+            if connection is not None:
+                with suppress(Exception):
+                    await connection.close()
+
+    @staticmethod
+    async def _load_guarded_lease(
+        connection: AsyncConnection,
+        proof: LeaseAuthorityProof,
+    ) -> WorkerLeaseRecord | None:
+        row = (
+            await connection.execute(
+                select(
+                    worker_leases.c.tenant_id,
+                    worker_leases.c.run_id,
+                    worker_leases.c.worker_id,
+                    worker_leases.c.claim_id,
+                    worker_leases.c.token_digest,
+                    worker_leases.c.attempt_no,
+                    worker_leases.c.lease_version,
+                    worker_leases.c.duration_seconds,
+                    worker_leases.c.acquired_at,
+                    worker_leases.c.heartbeat_at,
+                    worker_leases.c.lease_expires_at,
+                    worker_leases.c.released_at,
+                    worker_leases.c.record_format_version,
+                )
+                .where(
+                    worker_leases.c.tenant_id == str(proof.tenant_id),
+                    worker_leases.c.run_id == str(proof.run_id),
+                )
+                .with_for_update()
+            )
+        ).first()
+        return None if row is None else decode_worker_lease(_record(row))
+
+    @staticmethod
+    def _validate_current_lease(
+        proof: LeaseAuthorityProof,
+        lease: WorkerLeaseRecord | None,
+        *,
+        run_status: str,
+        platform_now: datetime,
+    ) -> None:
+        if (
+            lease is None
+            or lease.tenant_id != proof.tenant_id
+            or lease.run_id != proof.run_id
+            or lease.worker_id != proof.worker_id
+            or lease.claim_id != proof.claim_id
+            or lease.attempt_no != proof.attempt_no
+            or not lease_token_matches(proof.token, lease.token_digest)
+            or lease.released_at is not None
+            or run_status not in {"queued", "running"}
+        ):
+            raise WorkerLeaseError(WorkerLeaseErrorCode.LEASE_NOT_CURRENT)
+        if lease.lease_expires_at <= platform_now:
+            raise WorkerLeaseError(WorkerLeaseErrorCode.LEASE_EXPIRED)
+
+    @staticmethod
+    async def _database_now(connection: AsyncConnection) -> datetime:
+        value = await connection.scalar(text("SELECT clock_timestamp()"))
+        if not isinstance(value, datetime) or value.tzinfo is None:
+            raise RunRepositoryError(RunRepositoryErrorCode.DATA_CORRUPTION)
+        return value
+
+    @staticmethod
+    def _observe_guarded_commit(
+        telemetry: WorkerLeaseTelemetry,
+        proof: LeaseAuthorityProof,
+        result: CommitOutcome | RunLifecycleError | RunRepositoryError | WorkerLeaseError,
+    ) -> None:
+        if isinstance(result, CommitOutcome):
+            outcome_code = "replayed" if result.replayed else "committed"
+            phase = LeaseTransactionPhase.COMPLETE
+            replayed = result.replayed
+        else:
+            outcome_code = result.code.value
+            phase = (
+                LeaseTransactionPhase.COMMIT
+                if outcome_code == "commit_outcome_unknown"
+                else LeaseTransactionPhase.COMPLETE
+            )
+            replayed = False
+        deliver_terminal_observation(
+            telemetry,
+            LeaseOperationObservation(
+                operation=LeaseOperation.COMMIT_WITH_LEASE,
+                terminal_phase=phase,
+                outcome_code=outcome_code,
+                correlation_id=None,
+                tenant_id=proof.tenant_id,
+                run_id=proof.run_id,
+                worker_id=proof.worker_id,
+                claim_id=proof.claim_id,
+                duration_bucket=None,
+                replayed=replayed,
+                empty=False,
+                contended=False,
+            ),
+        )
 
     async def _transaction_boundary(self, name: str, connection: AsyncConnection) -> None:
         """Internal deterministic fault-test seam; production implementation is a no-op."""
