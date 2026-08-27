@@ -154,8 +154,17 @@ uv run pytest -m "not online and not postgresql"
 uv run alembic upgrade head
 uv run alembic current --check-heads
 uv run alembic check
-uv run pytest -m postgresql
+uv run pytest -m "postgresql and not performance"
+uv run pytest -m "postgresql and performance" tests/performance/test_postgresql_run_repository.py
+uv run pytest -m "postgresql and performance" tests/performance/test_postgresql_worker_lease_kernel.py
 ```
+
+绝对延迟门禁必须在资源、PostgreSQL 镜像、连接池和超时均已固定并记录的环境中，以独立
+pytest 进程逐个运行带 `postgresql and performance` 选择的性能模块；不得调高阈值、减少
+样本或降低并发来适配异构共享 runner。共享 CI 运行全部
+`postgresql and not performance` 节点且不允许 skip，同时必须证明性能选择非空、包含所有
+性能模块且不会泄漏进功能选择。共享 CI 不据此声明性能通过，也不把其绝对延迟作为产品
+回归判据。
 
 应用进程不得调用 `create_all`、Alembic upgrade/stamp 或自动修复 Schema。迁移必须由独立
 发布步骤执行；`downgrade base` 等破坏性操作必须先校验数据库、用户、主机和一次性环境身份，

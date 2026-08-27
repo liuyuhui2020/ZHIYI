@@ -169,6 +169,11 @@ CI 中第三方 Action 已固定到 v7 的完整 commit SHA，升级时要核对
   `not online and not postgresql`，数据库门禁独立使用 PostgreSQL 18.6 服务。
 - CI 必须先证明 PostgreSQL 集合非空，且 contract/integration/performance 数据库路径不会
   被快速门禁收集；缺少数据库 URL 时真实库门禁失败，不能静默 skip。
+- 性能模块必须同时声明 `postgresql` 与 `performance` marker。共享 CI 必须以零 skip 运行
+  全部 `postgresql and not performance` 节点，并证明 `postgresql and performance` 非空、
+  包含全部性能模块且不会混入功能选择。绝对延迟阈值只在资源、镜像、连接池和超时均固定并
+  记录的合格环境以独立 pytest 进程逐模块执行；共享 runner 不得通过调阈值、减样本或降
+  并发来伪造性能通过。
 - Schema 只能通过独立 `alembic upgrade head` 发布，并执行 `current --check-heads` 与
   `alembic check`；应用构造和启动禁止 `create_all`、stamp、upgrade 或自动修复。
 - destructive downgrade/restore 只允许在身份已核验的一次性数据库执行，生产数据回退必须

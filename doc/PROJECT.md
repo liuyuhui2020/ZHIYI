@@ -50,6 +50,8 @@ ZHIYI 是一个面向开发者、自托管、基于 LangChain 生态的 Agent Ru
 - 完成 PostgreSQL Worker Lease Kernel：租户内 FIFO 领取、24 小时领取回放、数据库权威
   时间、权限读取、单调续租/释放、失效 `running` 观察及同事务租约守卫写入；真实库已覆盖
   并发、公平探测、重启、故障收敛、租户隔离、迁移/恢复、脱敏与性能门禁。
+- PostgreSQL 共享 CI 完整执行非性能功能门禁并验证性能模块可收集且隔离；绝对延迟仍只在
+  已记录的固定性能环境按原阈值、样本量和并发度判定，不以异构共享 runner 延迟替代。
 - 保持 004/005 契约不变：租约操作不改变 Run/Event/CommandReceipt，普通生命周期命令仍
   使用原端口，只有 Worker 产出的新写入使用更强的 `commit_with_lease` 原子 fencing 边界。
 

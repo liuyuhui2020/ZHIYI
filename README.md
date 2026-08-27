@@ -252,8 +252,15 @@ The real-database lane requires the disposable service and an explicit migration
 docker compose -f compose.test.yaml up -d --wait postgresql
 export ZHIYI_TEST_DATABASE_URL='postgresql+psycopg://zhiyi_test:zhiyi_test_password@127.0.0.1:55432/zhiyi_test'
 uv run alembic upgrade head
-uv run pytest -m postgresql
+uv run pytest -m "postgresql and not performance"
 ```
+
+Absolute latency acceptance is a separate fixed-environment gate. On the recorded host
+profile, run each file in an independent pytest process selected with
+`-m "postgresql and performance"`; keep the checked-in thresholds, warmups, samples,
+concurrency, durability, and safety assertions unchanged. Heterogeneous shared CI collects
+this selection to prove it is present and isolated, but does not use shared-runner
+wall-clock latency as a product regression signal.
 
 Feature 006 can be exercised with focused real-database, fault-window, and performance
 commands:
@@ -261,7 +268,7 @@ commands:
 ```bash
 uv run pytest -m postgresql tests/contract/persistence/test_postgresql_worker_lease_repository_contract.py
 uv run pytest -m postgresql tests/integration/persistence/test_postgresql_worker_lease_faults.py
-uv run pytest -m postgresql tests/performance/test_postgresql_worker_lease_kernel.py
+uv run pytest -m "postgresql and performance" tests/performance/test_postgresql_worker_lease_kernel.py
 uv run alembic current --check-heads
 uv run alembic check
 ```

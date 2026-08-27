@@ -3,7 +3,8 @@
 **Feature**: 006-worker-lease-kernel
 **Status**: ALIGNED
 **Docs-Impact**: UPDATED
-**Docs-Updated**: README.md, doc/PROJECT.md, doc/功能文档.md, doc/技术方案.md
+**Docs-Updated**: README.md, doc/AGENTS.md, doc/PROJECT.md, doc/SDD开发规范.md,
+doc/功能文档.md, doc/技术方案.md
 **Docs-Impact-Reason**: Feature 006 adds a PostgreSQL-backed Worker lease coordination
 kernel and a lease-guarded Run write boundary while deliberately excluding every Worker
 execution loop, Agent/Graph/Tool execution, Checkpoint, Reconciler, API/SDK, deployment,
@@ -23,8 +24,24 @@ and production data operation.
 - The user explicitly approved M0 product implementation and directed execution from
   T001, with tests written before production behavior from T002 onward.
 - Every required task, test, migration, performance, documentation, governance, and
-  convergence gate is complete. The production enablement blockers below remain
-  deliberately open and do not authorize rollout.
+  convergence gate was complete before the post-merge CI remediation below. Phase 9 is
+  also complete; the production enablement blockers below remain deliberately open and
+  do not authorize rollout.
+
+### Post-merge CI remediation gate (2026-08-27)
+
+- Main commit `af4fc8f4752b13a85c07abed59c74d563b0f944c` passed SDD Governance,
+  Documentation Website, frozen Python quality, all migrations, and 118 real PostgreSQL
+  functional tests in GitHub Actions run `33034409677`.
+- The same 4-vCPU heterogeneous hosted runner failed only the two absolute-latency
+  modules: the 005 page-100/atomic-commit p95 values were 100.153/108.034 ms against
+  100 ms, and the 006 full issue+claim p95 was 389.825 ms against 200 ms. The recorded
+  fixed 10-logical-CPU local environment had already passed the unchanged workloads,
+  including 006 issue+claim p95 133.701 ms.
+- The user explicitly approved synchronizing the fixed-environment boundary through Spec
+  Kit, retaining every threshold/sample/concurrency/safety requirement, running all
+  non-performance PostgreSQL acceptance on shared CI, and then committing the verified
+  repair to `main`. No deployment or production operation is authorized.
 
 ## Planned Change Set
 
@@ -67,10 +84,11 @@ and production data operation.
   `test_postgresql_worker_lease_faults.py`,
   `test_postgresql_worker_lease_restart.py`,
   `test_postgresql_worker_lease_tenant_isolation.py`,
-  `test_worker_lease_migrations.py`, `test_migrations.py`, and
+  `test_worker_lease_migrations.py`, `test_migrations.py`,
+  `tests/performance/test_postgresql_run_repository.py`, and
   `tests/performance/test_postgresql_worker_lease_kernel.py`.
-- Long-lived documentation: `README.md`, `doc/PROJECT.md`, `doc/功能文档.md`, and
-  `doc/技术方案.md`.
+- Long-lived documentation: `README.md`, `doc/AGENTS.md`, `doc/PROJECT.md`,
+  `doc/SDD开发规范.md`, `doc/功能文档.md`, and `doc/技术方案.md`.
 
 ## Required Safety Invariants
 
@@ -229,6 +247,46 @@ production schema/data mutation, production secrets, backup service, or NTP serv
   counts are all zero; no severity bucket contains a finding. `tasks.md` remained
   byte-for-byte unchanged during this final converge pass, so no new phase or task was
   appended.
+- T063-T064 post-merge design synchronization: the approved boundary is now explicit in
+  31 functional requirements and 15 success criteria plus Plan, Tasks, requirements
+  checklist, Quickstart, README, AGENTS, PROJECT, and the SDD operating guide. The
+  speckit-analyze pass found zero critical, high, medium, or low conflicts; requirement
+  and criterion identifiers are unique and continuous, and no clarification marker,
+  placeholder, or constitution conflict remains.
+- T065 marker red/green: before implementation, `postgresql and performance` collected
+  zero nodes and both latency modules leaked into `postgresql and not performance`.
+  After adding only the registered module markers, the performance selection collects
+  exactly the 005 and 006 nodes and the functional selection collects zero performance
+  nodes. No benchmark workload, assertion, threshold, warmup, sample, concurrency,
+  durability, tenant, or fencing behavior changed.
+- T066 shared-CI partition: local execution of the workflow's exact collection logic
+  reports 120 PostgreSQL nodes total, 118 functional nodes, 2 performance nodes, and zero
+  database nodes in the fast selection. YAML parsing passes. The shared job upgrades and
+  verifies Alembic, runs all 118 functional nodes with zero skips, and only collects the
+  two fixed-environment performance nodes; it makes no SC-008/SC-011 latency claim.
+- T067 final local gates: frozen sync reports 60 packages; Alembic upgrades to
+  `0002_worker_lease_kernel`, `current --check-heads` and `alembic check` pass; the real
+  functional lane reports 118 passed/642 deselected in 114.26 seconds; the fast lane
+  reports 638 passed/122 deselected in 3.36 seconds; Ruff passes, all 126 checked files
+  are formatted, strict mypy reports no issues in 123 source files, and all 29 SDD unit
+  tests pass.
+- T067 fixed-environment latency evidence uses the recorded PostgreSQL 18.6 digest,
+  macOS 15.5 arm64 host with 10 logical CPUs and 16 GiB memory, pool 20/zero overflow,
+  20 clients, 100 warmups, and 1,000 measured samples per operation. Independent pytest
+  processes report 005 p95 load 13.952 ms/page-100 71.719 ms/atomic commit 38.987 ms,
+  all below 100 ms; 006 p95 full issue+claim 117.207 ms/renew 94.749 ms/authority read
+  47.371 ms/release 39.448 ms, all below 200 ms, with zero lock waits. Exploratory
+  combined-process runs observed 005 page-100 p95 variance of 128.655-138.500 ms while
+  the host load average reached 10.46; those runs are not counted as a pass. The accepted
+  procedure therefore preserves each original workload in an independent pytest process
+  and never changes a threshold, sample, concurrency, or safety requirement.
+- T068 convergence: all 31 functional requirements, 15 success criteria, 20 original
+  user-story acceptance scenarios, the Phase 9 six-task ledger, Plan constraints, and all
+  8 constitution principles were rechecked. Missing, partial, contradictory, unrequested,
+  and untraced-path finding counts are all zero. The implementation diff changes only two
+  module marker declarations and the shared-CI workflow; no production source, migration,
+  schema, transaction, benchmark workload, or product behavior changed. The manual
+  design-drift gate passes with this report restored to `ALIGNED`.
 
 ## Blocking Findings
 

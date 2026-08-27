@@ -68,12 +68,15 @@ or receipt cleanup.
 
 ```bash
 uv run pytest -m "not online and not postgresql"
-uv run pytest -m postgresql
+uv run pytest -m "postgresql and not performance"
 ```
 
 Every real-database 006 module carries the registered module-level `postgresql`
-marker. CI collection checks must prove these modules contribute zero nodes to the
-fast lane and nonzero nodes to the PostgreSQL lane:
+marker. Performance modules also carry the registered module-level `performance`
+marker. Shared CI collection checks must prove the database modules contribute zero
+nodes to the fast lane, all functional modules contribute nonzero nodes to
+`postgresql and not performance`, and both performance modules contribute nonzero nodes
+only to `postgresql and performance`:
 
 - `tests/contract/persistence/test_postgresql_worker_lease_repository_contract.py`
 - `tests/integration/persistence/test_postgresql_worker_lease_claim.py`
@@ -84,6 +87,7 @@ fast lane and nonzero nodes to the PostgreSQL lane:
 - `tests/integration/persistence/test_postgresql_worker_lease_restart.py`
 - `tests/integration/persistence/test_postgresql_worker_lease_tenant_isolation.py`
 - `tests/integration/persistence/test_worker_lease_migrations.py`
+- `tests/performance/test_postgresql_run_repository.py`
 - `tests/performance/test_postgresql_worker_lease_kernel.py`
 
 No skipped PostgreSQL contract/concurrency/fault/migration test counts as acceptance.
@@ -201,8 +205,15 @@ The implementation security review must explicitly inspect:
 ## 9. Run latency acceptance
 
 ```bash
-uv run pytest -m postgresql tests/performance/test_postgresql_worker_lease_kernel.py
+uv run pytest -m "postgresql and performance" tests/performance/test_postgresql_run_repository.py
+uv run pytest -m "postgresql and performance" tests/performance/test_postgresql_worker_lease_kernel.py
 ```
+
+Run these commands only on the fixed and recorded acceptance profile. Shared hosted CI
+must collect this selection and prove it is isolated from the functional selection, but
+must not enforce or claim the absolute latency criteria on heterogeneous resources. Keep
+the two modules in independent pytest processes so their fixture and database activity is
+not an unrecorded input to the other benchmark.
 
 Reference workload:
 

@@ -266,3 +266,17 @@ operational prerequisites.
 - [X] T060 Extend tests/integration/persistence/test_postgresql_worker_lease_restart.py with at least 100 dispose/recreate acceptance cycles proving zero pre-expiry takeover, post-expiry queued reclaim, monotonic counters, exact receipt replay, and permanent old-proof fencing per SC-006 (partial)
 - [X] T061 Extend tests/integration/persistence/test_postgresql_worker_lease_expiry.py so a mixed 1,000-candidate real PostgreSQL set is traversed with default, 1, 100, and 1,000 page sizes plus fixed-as_of mutation, single-read, order, gap/duplicate/noncandidate/tenant and zero-write assertions per SC-013 (partial)
 - [X] T062 Extend tests/contract/persistence/worker_lease_repository_contract.py, tests/integration/persistence/test_postgresql_worker_lease_faults.py, tests/integration/persistence/test_postgresql_worker_lease_tenant_isolation.py, tests/integration/persistence/test_postgresql_worker_lease_expiry.py, tests/integration/persistence/test_postgresql_worker_lease_guard.py, and tests/unit/application/ports/test_worker_lease_observability.py with a traceable public-operation/outcome matrix proving exactly one post-cleanup safe terminal observation in log/metric/trace, independent failure of each channel, unchanged business outcomes, no retry/partial write, and zero forbidden fields per SC-014 (partial)
+
+## Phase 9: Hosted CI Performance-Boundary Repair
+
+**Purpose**: Repair the post-merge CI policy mismatch without changing any product
+behavior, performance threshold, sample count, concurrency, durability, or security
+invariant. The shared runner remains a complete PostgreSQL functional gate; absolute
+latency remains a fixed-environment acceptance gate.
+
+- [X] T063 Synchronize the approved fixed-performance-environment and shared-CI boundary in specs/006-worker-lease-kernel/spec.md, specs/006-worker-lease-kernel/plan.md, specs/006-worker-lease-kernel/checklists/requirements.md, specs/006-worker-lease-kernel/quickstart.md, specs/006-worker-lease-kernel/drift-report.md, README.md, doc/AGENTS.md, doc/PROJECT.md, and doc/SDD开发规范.md
+- [X] T064 Run speckit-analyze against the updated Feature 006 artifacts and resolve any critical conflict before implementation
+- [X] T065 Test-first prove `postgresql and performance` does not yet collect the 005/006 latency modules, then add the registered module-level performance marker without changing their workloads or assertions in tests/performance/test_postgresql_run_repository.py and tests/performance/test_postgresql_worker_lease_kernel.py
+- [X] T066 Update .github/workflows/runtime-python.yml so the shared PostgreSQL job separately proves the performance selection is nonempty and isolated, runs all `postgresql and not performance` nodes with zero skips, and never claims fixed-environment latency acceptance
+- [X] T067 Run frozen sync, collection-partition checks, fast/static/SDD gates, the full non-performance PostgreSQL lane, and both unchanged performance modules in the recorded local acceptance environment; record exact evidence in specs/006-worker-lease-kernel/drift-report.md
+- [X] T068 Run speckit-converge after all Phase 9 evidence is recorded, resolve every missing/partial/contradictory/unrequested finding, restore specs/006-worker-lease-kernel/drift-report.md to ALIGNED, and pass the manual design-drift gate before the separately authorized commit/push and main-CI verification

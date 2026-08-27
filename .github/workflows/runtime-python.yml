@@ -111,7 +111,7 @@ jobs:
       - name: Export disposable service identity
         run: echo "ZHIYI_TEST_POSTGRESQL_CONTAINER=${{ job.services.postgresql.id }}" >> "$GITHUB_ENV"
 
-      - name: Prove PostgreSQL and fast-lane collection partition
+      - name: Prove PostgreSQL functional, performance, and fast-lane partition
         shell: bash
         run: |
           uv run pytest --collect-only -q -m postgresql > /tmp/postgresql-nodes.txt
@@ -126,10 +126,25 @@ jobs:
             test_postgresql_worker_lease_restart.py \
             test_postgresql_worker_lease_tenant_isolation.py \
             test_worker_lease_migrations.py \
+            test_postgresql_run_repository.py \
             test_postgresql_worker_lease_kernel.py
           do
             grep -q "$module" /tmp/postgresql-nodes.txt
           done
+          uv run pytest --collect-only -q -m 'postgresql and performance' \
+            tests/performance/test_postgresql_run_repository.py \
+            tests/performance/test_postgresql_worker_lease_kernel.py \
+            > /tmp/postgresql-performance-nodes.txt
+          test -s /tmp/postgresql-performance-nodes.txt
+          grep -q 'test_postgresql_run_repository.py' /tmp/postgresql-performance-nodes.txt
+          grep -q 'test_postgresql_worker_lease_kernel.py' /tmp/postgresql-performance-nodes.txt
+          uv run pytest --collect-only -q -m 'postgresql and not performance' \
+            > /tmp/postgresql-functional-nodes.txt
+          test -s /tmp/postgresql-functional-nodes.txt
+          if grep -q '^tests/performance/' /tmp/postgresql-functional-nodes.txt; then
+            echo 'Performance nodes must not leak into shared-CI functional acceptance' >&2
+            exit 1
+          fi
           set +e
           uv run pytest --collect-only -q -m 'not online and not postgresql' \
             tests/contract/persistence/test_postgresql_run_repository_contract.py \
@@ -149,10 +164,10 @@ jobs:
           uv run alembic current --check-heads
           uv run alembic check
 
-      - name: Run real PostgreSQL acceptance
+      - name: Run real PostgreSQL functional acceptance
         shell: bash
         run: |
-          uv run pytest -ra -m postgresql | tee /tmp/postgresql-acceptance.txt
+          uv run pytest -ra -m 'postgresql and not performance' | tee /tmp/postgresql-acceptance.txt
           if grep -Eq '[0-9]+ skipped' /tmp/postgresql-acceptance.txt; then
             echo 'PostgreSQL acceptance must not contain skipped tests' >&2
             exit 1

@@ -38,11 +38,13 @@ an injected application port with three isolated channels; 006 adds no exporter 
 two new 006 tables and one new component compatibility row
 
 **Testing**: pytest + pytest-asyncio, framework-neutral unit/contract tests, real
-PostgreSQL 18.6 contract/concurrency/restart/fault/migration/redaction tests, Ruff,
-format check, mypy, SDD tests, design-drift, analyze, and converge
+PostgreSQL 18.6 contract/concurrency/restart/fault/migration/redaction tests, separately
+marked fixed-environment performance acceptance, Ruff, format check, mypy, SDD tests,
+design-drift, analyze, and converge
 
 **Target Platform**: Linux server runtime and Linux CI; disposable Docker Compose
-acceptance on Linux/macOS development hosts
+functional acceptance on Linux/macOS development hosts; absolute latency acceptance only
+on a fixed and recorded performance host profile
 
 **Project Type**: Python modular-monolith library with hexagonal domain/application/
 adapter/infrastructure boundaries; no new service process or endpoint
@@ -61,7 +63,8 @@ after transaction/connection release and unable to alter business results; exact
 
 **Scale/Scope**: One PostgreSQL coordination adapter, one stronger guarded Run port,
 one expand migration, 100 x 20 contention groups, 100 ownership/failure cycles, 1,000
-inactive-running observations, recording telemetry acceptance, and local/CI acceptance;
+    inactive-running observations, recording telemetry acceptance, shared-CI functional
+    acceptance, and fixed-environment performance acceptance;
 no production telemetry exporter, scheduler,
 cleanup daemon, deployment, backup service, or execution-capacity claim
 
@@ -432,9 +435,20 @@ so the missing behavior fails for the intended reason before production changes.
 - Measure the complete issuance+claim path plus renew/authority/release with 10,000
   queued Runs, 20 clients, 100 warmups, 1,000 samples, nearest-rank p95 <200 ms. Record
   exact DB image, host resources, pool/timeouts, query plans, and lock waits.
-- Extend CI collection assertions for every new module and increase only the
-  PostgreSQL job timeout if the measured deterministic suite cannot fit its current
-  30-minute bound; do not reduce repetitions or silently skip performance/fault tests.
+- Mark both 005 and 006 latency modules with `postgresql` plus `performance`. A fixed,
+  recorded performance environment runs each module in an independent pytest process
+  selected by `postgresql and performance`, with unchanged thresholds, repetitions,
+  concurrency, durability, fencing, and tenant isolation. Independent processes prevent
+  one benchmark's imports, fixtures, writes, or cleanup from becoming another benchmark's
+  unrecorded environment input.
+- The heterogeneous shared GitHub runner runs every `postgresql and not performance`
+  node with zero skips, separately proves `postgresql and performance` is nonempty and
+  contains both latency modules, and proves no performance node leaks into the functional
+  selection. This lane does not claim SC-008 and does not classify shared-runner absolute
+  latency as a product regression.
+- Extend CI collection assertions for every new module and increase only a qualified
+  fixed-environment job timeout if its deterministic suite cannot fit the bound; do not
+  reduce repetitions, relax thresholds, or silently skip functional/fault acceptance.
 
 ## Project Structure
 
@@ -522,11 +536,14 @@ tests/
 │   ├── test_worker_lease_migrations.py
 │   └── test_migrations.py                    # preserve/extend 005 head expectations
 └── performance/
-    └── test_postgresql_worker_lease_kernel.py
+    ├── test_postgresql_run_repository.py       # add shared performance marker
+    └── test_postgresql_worker_lease_kernel.py  # add shared performance marker
 
 .github/workflows/runtime-python.yml          # collection and timeout evidence
 README.md
+doc/AGENTS.md
 doc/PROJECT.md
+doc/SDD开发规范.md
 doc/功能文档.md
 doc/技术方案.md
 specs/006-worker-lease-kernel/drift-report.md
@@ -549,8 +566,11 @@ no-work claim receipt has no Run foreign key and cannot rely on `TRUNCATE runs C
 - `doc/需求文档.md` has no planned change because the product requirements are not
   changed; 006 implements only a prerequisite and does not claim its 30-second
   recovery/Reconciler/capacity outcomes.
-- Constitution, `doc/AGENTS.md`, SDD operating rules, Model Gateway docs, and 004/005
-  specs remain unchanged unless later analysis discovers a real conflict.
+- `doc/AGENTS.md` and `doc/SDD开发规范.md`: record the qualified performance environment
+  and shared-CI functional/performance collection split without weakening PostgreSQL
+  correctness gates.
+- Constitution, Model Gateway docs, and 004/005 product specs remain unchanged unless
+  later analysis discovers a real conflict.
 
 ## Risk Register and Mitigations
 
@@ -564,6 +584,7 @@ no-work claim receipt has no Run foreign key and cannot rely on `TRUNCATE runs C
 | Renew/release lost ACK causes double extension | Lease authority exceeds requested period | Token/attempt plus never-reset version; read before retry, unchanged permits same condition, advanced confirms only; 100 repeated fault windows |
 | New migration breaks 005 rolling replicas | Deploy outage | Add-only 0002, independent compatibility component, unchanged 0001 and `run_repository=1`, two-version integration tests |
 | High-frequency heartbeats inflate data/CI time | Vacuum pressure or impractical gate | One mutable row, no heartbeat receipts, bounded claim-receipt index, realistic 20-client benchmark; raise CI timeout based on measurements rather than weakening tests |
+| Heterogeneous hosted-runner latency is treated as a deterministic regression | A correct implementation fails because shared CPU/I/O differs from the recorded acceptance host, encouraging threshold inflation | Keep original absolute thresholds only in a fixed recorded environment; shared CI runs the complete non-performance PostgreSQL lane and proves both performance modules collect and remain isolated |
 | Telemetry callback fails or leaks sensitive data | Correct lease results could be replaced, writes retried, or credentials exposed | Required three-channel port invoked only after cleanup; isolate channel exceptions; bounded allowlist fields; positive emission plus sentinel tests under SC-009/SC-014; no exporter dependency in 006 |
 
 ## Complexity Tracking

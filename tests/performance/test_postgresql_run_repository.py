@@ -41,7 +41,7 @@ from zhiyi.infrastructure.database.engine import (
     dispose_postgresql_engine,
 )
 
-pytestmark = pytest.mark.postgresql
+pytestmark = [pytest.mark.postgresql, pytest.mark.performance]
 ROOT = Path(__file__).resolve().parents[2]
 NOW = datetime(2026, 8, 25, 12, 0, tzinfo=UTC)
 

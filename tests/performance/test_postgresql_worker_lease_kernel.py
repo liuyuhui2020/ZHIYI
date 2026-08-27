@@ -37,7 +37,7 @@ from zhiyi.infrastructure.database.engine import (
 )
 from zhiyi.infrastructure.security.lease_tokens import SecureLeaseTokenGenerator
 
-pytestmark = pytest.mark.postgresql
+pytestmark = [pytest.mark.postgresql, pytest.mark.performance]
 ROOT = Path(__file__).resolve().parents[2]
 TENANT_ID = TenantId("tenant-worker-lease-performance")
 WARMUP_SAMPLES = 100

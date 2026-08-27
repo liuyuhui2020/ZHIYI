@@ -37,3 +37,4 @@
 - Claiming work never mutates the Run lifecycle. A `running` Run whose lease naturally expires or is deliberately released is observable only and cannot be reassigned until Checkpoint and recovery semantics are approved in later features.
 - Lease-safety review removed the incompatible permanent command-guard table, preserved ordinary 004 replay, and explicitly blocked production enablement while raw claim replay tokens have no physical retention/encryption contract.
 - LangGraph, Checkpoint, Agent/model/Tool/Graph execution, Worker background loops, Reconciler, REST/SSE, SDK, and related integrations are explicitly excluded.
+- Validation iteration 3 kept performance outcomes unchanged while separating fixed-environment absolute latency evidence from heterogeneous shared-CI functional evidence; all 16 items remain satisfied.
